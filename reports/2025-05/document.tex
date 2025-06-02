@@ -1,0 +1,136 @@
+\maketitle
+%\thispagestyle{fancy}
+\section*{Overview}
+
+Work this month was carried out in the context of two work streams from the project roadmap.\footnote{\url{https://github.com/shtukaresearch/swarmonomics/blob/main/2025-research-programme.md}}
+
+\begin{enumerate}
+\item \emph{Stake transparency.} Surface and publish Swarm metrics relevant to node operators. Make it easier to enter the NO market.
+
+Andrew worked with Pavel to establish node data pipelines and spin up the first alpha version of Swarm-Dash.
+
+\item \emph{Node strategies.}  Continuing on our work from the staking analysis carried out over Winter 2024/25, identify and evaluate the externalities of adversarial staker strategies.
+
+Aata has been studying adversarial node strategies that aim to profit by undermining consensus over the reserve, which is part of the r8 sampling scheme needed to establish the storage index. Article coming soon.
+
+\end{enumerate}
+\section*{Operations management}
+
+\subsection*{Completed Milestones}
+
+\begin{itemize}
+  \item 
+    Design and v0.1 implementation of data ingestion pipeline to collect events from Swarm smart contracts on Gnosis Chain.
+  \item 
+    Design and v0.1 implementation of backend API for Swarm staker dashboard.
+  \item
+    Review methods to publish data visualisations including Python notebooks for public consumption.
+  \item
+
+\end{itemize}
+
+\subsection*{Future milestones}
+
+\begin{itemize}
+  \item Make data ingestion pipeline live and autonomous.
+  \item Implement dashboard frontend.
+\end{itemize}
+
+
+\subsection*{Roadmap highlights}
+
+\paragraph{June, July} 
+%
+Further development of Swarm staker metrics and dashboard. 
+%
+Econometric studies of price elasticities and responsiveness to volatility.
+
+\paragraph{August onwards}
+%
+Further analysis of staker strategies.
+%
+Empirical studies.
+
+\paragraph{September onwards}
+%
+Theoretical analysis of price oracle controller.
+
+\paragraph{November}
+%
+Publication of semiannual report.
+
+
+\subsection*{Roadmap revisions}
+
+\begin{itemize}
+  \item Study of Swarm staker strategies moved forward in the timeline in light of recent interest on `ghetto' neighbourhoods.
+\end{itemize}
+
+
+
+\section*{Findings}
+
+\subsection*{Swarm node operator dash}
+
+What information do stakers need to enter the Swarm supply market?
+%
+What information is feasible and useful to make available through a public staking dashboard?
+
+The most obvious questions are:
+\begin{enumerate}
+\item Where (i.e. in what address range) should I put my node?
+\item How much expected revenue do I get per unit BZZ (for given investment size and node address)?
+\item How much should I put down?
+\end{enumerate}
+
+Answering these questions carefully requires forecasting various future events, which is hard. For our public dashboard, we'll give zeroth order approximations to the answers, based on what is happening in the Swarm node market *at the time of the request*.
+
+\begin{enumerate}
+\item Join the neighbourhood with the lowest cost per unit of current revenue — that is, the one with the lowest total effective stake.
+
+   The neighbourhood recommender provided by \url{https://swarmscan.io} returns the neighbourhood with the smallest number of nodes. It is good for the health of the storage network if nodes always join these low node count neighbourhoods. But it's not necessarily the best option for each NO individually.
+   
+   We will ship a neighbourhood recommender endpoint in the next version of Swarm Dash.
+
+\item Assume that a weighted average of recent network revenue represents a forecast of future revenue, and that the share distribution for each neighbourhood remains stable. Then a simple calculation tells us how much revenue we can expect from a given deposit size. 
+
+   Since depositing stake has a dilutive effect, topping up has diminishing returns to scale, so revenue "per unit BZZ" is not actually that useful a metric — you need to look at the revenue for an actual finite amount.
+   
+   We will ship an expected revenue endpoint in a near future version of Swarm Dash.
+
+\item How much should I put down?
+   Since stake is not redeemable under normal circumstances, purchasing stake should be treated as a capital expense. The investment horizon substantially governs the perceived value of the opportunity — unlike for "typical" staking products like Ethereum, NOs must decide how long they are prepared to wait for revenue to pay off the expense. Therefore, to recommend an investment amount we should ask users to input this time.
+   
+   We will ship a deposit recommender endpoint in a later version of Swarm Dash.
+\end{enumerate}
+
+Deployment:
+
+\begin{itemize}
+\item We deployed version 0.1 of the API at api.dash.swarm.shtuka.io.\footnote{See \url{https://api.dash.swarm.shtuka.io/docs} for Swagger frontend.} The stake data it serves is a snapshot taken on June 1st. Frontend coming soon! Please don't DOS it!
+\end{itemize}
+
+Fun facts from the data:
+
+\begin{itemize}
+\item We noticed 789 nodes staked at height 102 (under SWIP-21). We're informed that this was the result of testing activity in response to a bug which allowed complete withdrawal of stake under certain conditions.
+\item There seem to be more nodes topping up stake past the minimum BZZ than when we last looked in the winter. We're still not sure if this represents competitive or simply testing activity.
+\end{itemize}
+
+\subsection*{Ghetto neighbourhoods}
+
+How strong is consensus over the reserve? What are the thresholds and payoffs for successful consensus attacks?
+
+Main observations:
+
+\begin{itemize}
+  \item Nodes may deliberately try to break consensus by, say, including data in their reserve that they have not shared with other nodes. Under such a strategy, the adversary node is sure to win the redistribution pot as long as they get elected consensus leader. OTOH, they are sure to be frozen if anyone else wins. 
+  \item With current network parameters, these risks actually balance each other out.
+  \item However, this adversarial strategy also negatively affects the rewards received by other nodes, creating what we call a \emph{ghetto}. 
+  %
+  Crucially, honest NOs who find themselves in a ghetto \emph{may then choose to migrate to another neighbourhood} where there are fewer consensus faults and hence a more reliable income stream.
+  %
+  This leaves the adversary with a larger share of the income stream to that neighbourhood than they would have if they behaved honestly.
+\end{itemize}
+
+We aim to publish a more detailed memo on this topic in June.
