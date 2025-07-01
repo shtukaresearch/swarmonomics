@@ -1,0 +1,187 @@
+\maketitle
+%\thispagestyle{fancy}
+\section*{Overview}
+
+The main activity of the month was our visit to Berlin Blockchain week, where both Aata and Andrew spoke at Protocol Berg.
+%
+Andrew spoke on reward redistribution mechanisms in decentralised storage, an adaptation of analysis of Swarm's redistribution game carried out for the Swarm Foundation last winter.
+%
+A video of the talk is available at \url{https://watch.protocol.berlin/65a90bf47932ebe436ba9351/watch?session=6855555d90bd41297bfce8b6}.\footnote{Aata's talk was not part of the Swarmonomics programme, but it may also be of interest. It can be found at \url{https://watch.protocol.berlin/65a90bf47932ebe436ba9351/watch?session=685554f590bd41297bf6a699}.}
+
+Apart from Berg, we continued to work in the context of two work streams from the project roadmap.\footnote{\url{https://github.com/shtukaresearch/swarmonomics/blob/main/2025-research-programme.md}}
+
+\begin{enumerate}
+\item \emph{Stake transparency.} Surface and publish Swarm metrics relevant to node operators. Make it easier to enter the NO market.
+
+Andrew worked with Pavel to establish node data pipelines and frontend and deliver a second alpha version of Swarm-Dash.
+%
+The API now includes a neighbourhood recommender based on effective stake balances instead of raw node count.
+
+\begin{itemize}
+  \item \emph{Frontend.} Using mocked data. 
+  
+  {\small \url{https://bafybeidno4bvhxvm23hlhl7h2hhrgvga3a7kvylupanj4xmqy4x2mq6l2m.ipfs.dweb.link/}}
+  \item \emph{API.} \url{https://api.dash.swarm.shtuka.io/docs}
+\end{itemize}
+
+\item \emph{Node strategies.}  Continuing on our work from the staking analysis carried out over Winter 2024/25, identify and evaluate the externalities of adversarial staker strategies.
+
+Aata worked with Swarm Foundation Research and with contract source code to confirm details of the leader election algorithm in order to better understand consensus attack strategies. 
+%
+Our memo will be published later this week.
+
+\item \emph{Price dynamics.} We began collaborating with SF Research to explore the dynamics of the price oracle mechanism.
+
+\end{enumerate}
+\section*{Project management}
+
+\subsection*{Completed Milestones}
+
+\begin{itemize}
+  \item 
+    Improvements to Swarm contract data ingestion pipeline.
+  \item 
+    Improvements to backend API for Swarm staker dashboard.
+    %
+    Neighbourhood recommender and historic storage price endpoints added.
+  \item
+    Live frontend deployment (alpha) for stake dashboard.
+  \item
+    Strategic analysis of `ghettoisation` attacks on consensus over the reserve.
+
+\end{itemize}
+
+\subsection*{Future milestones}
+
+\begin{itemize}
+  \item Bring API specification up to beta.
+  \item Study effect of freezing or slashing parameter on payoffs of consensus attacks.
+  \item Empirical study of node strategies. 
+\end{itemize}
+
+
+\subsection*{Roadmap highlights}
+
+\paragraph{July} 
+%
+Further development of Swarm staker metrics and dashboard. 
+%
+Publish memos on ghetto neighbourhoods.
+%
+Exploration of simplifications to the staking system.
+
+\paragraph{August onwards}
+%
+Further analysis of staker strategies.
+%
+Econometric studies of price elasticities and responsiveness to volatility.
+
+\paragraph{September onwards}
+%
+Theoretical analysis of price oracle controller.
+
+\paragraph{November}
+%
+Publication of semiannual report.
+
+
+\subsection*{Roadmap revisions}
+
+\begin{itemize}
+  \item Econometric studies pushed back to August.
+  \item New work on potential simplifications to the staking system bumped up and prioritised for July.
+\end{itemize}
+
+
+
+\section*{Findings}
+
+\subsection*{Swarm node operator dash}
+
+We spent some time getting to grips with two other public dashboards that present Swarm data:
+%
+\begin{itemize}
+  \item \url{https://swarmscan.io}. Much of the community is probably aware of the Swarmscan dashboard and API. 
+  %
+  Swarmscan focuses mainly on p2p network level data, rather than economic data.
+  %
+  Critically, its public API does not serve a stake snapshot (though it does serve event data that could be used to construct one).
+
+  \item \url{https://dysordys.shinyapps.io/shinystats/}. Built in R and intended mainly for consumption for internal research teams.
+\end{itemize}
+%
+We had better distinguish the purpose of our node operator dash from these interfaces.
+%
+Our node operator dash will present economic data, most of which is pulled directly from the chain, with the goal of highlighting easily understandable metrics to aid strategic decision-making by a non-scientific audience.
+
+Deployment:
+%
+\begin{itemize}
+\item We deployed version 0.2 of the API at api.dash.swarm.shtuka.io. The stake data it serves is a snapshot taken on June 30th. Preliminary version of frontend is available on dweb.
+\end{itemize}
+
+Fun facts from the data:
+%
+\begin{itemize}
+\item 
+  Although the stake table records over 13,000 entries, \url{swarmscan.io} reports less than half that number of active nodes on the network.
+  %
+  Therefore, most of the nodes that have staked in the past are probably not still participating in the redistribution game.
+  %
+  We're looking into using Swarmscan data to improve our neighbourhood recommender algorithm.
+
+\end{itemize}
+
+\subsection*{Ghetto neighbourhoods}
+
+We'll publish a memo on this topic later this week.
+%
+Next steps will be to confirm the source and timing of randomness used in leader election, compute payoffs in the presence of a freezing or slashing parameter, and develop methods to observe `antisocial' behaviour.
+
+\subsection*{Simplifications to staking system}
+
+While building the stakes endpoint for our data API, we discovered that we had misunderstood the three-term model of ``potential,'' ``committed,'' and ``effective'' stake introduced in SWIP-20.\footnote{\url{https://github.com/ethersphere/SWIPs/blob/master/SWIPs/swip-20.md}}
+%
+We imagine that other teams might encounter the same confusion when interacting with this protocol.
+%
+Hence, we began to consider simplifications such as a return to a one-term stake model, which as far as we know remains the most widely used model for token systems with `staked' collateral.
+
+The motivation for introducing this model was, according to the SWIP, to ``allow users to withdraw part of their stakes.''
+%
+The ability to withdraw stakes under certain conditions adds optionality to the stake position, which node operators can use to improve their risk management.
+%
+The multiple parameters of the SWIP-20 model are required to track the chosen conditions.
+
+For simplicity, let us explore a system in which stake can be redeemed unconditionally.
+%
+This removes the need to track multiple parameters for computing withdrawal conditions and hence permits a return to a more standard single term stake position.
+%
+Some advantages suggest themselves:
+%
+\begin{enumerate}
+  \item
+    By making the system more similar to other staking systems, it becomes much easier to compare risks and rewards on an even footing.
+  \item
+    Without withdrawals, stake positions are likely to be dominated by owners who can afford to wait longer for their capital investment to pay itself off. This creates a barrier to entry primarily affecting smaller operators. With withdrawals allowed, commitment time doesn't matter very much.
+  \item
+    Withdrawals allow resources to be reallocated to more efficient operators, i.e. ones with lower operating costs per unit of storage.\footnote{For more details on this claim, see Theorem 1.1 of our staking analysis report published in January: \url{https://github.com/shtukaresearch/swarm-staking/releases/tag/full-1}}
+  \item
+    It will likely increase demand for BZZ to hold for the purpose of staking.
+  \item
+    Because withdrawable stake can still be forfeited, enabling withdrawals increases the leverage the system has over the behaviour of stakers by slashing or inactivity penalties.
+
+\end{enumerate}
+
+
+What are the potential disadvantages of a system with withdrawable stake?
+%
+The only one we could think of is that the much lower level of investment in the stake registry that we expect in a system without any redemptions implies that each investment is much more \emph{capital efficient} than its counterpart in the withdrawals-enabled model.
+%
+That is, the same rate of annual revenue can be achieved with a lower upfront capital spend.
+
+
+On the other hand, because the investor is not guaranteed to ever recover the amount of his initial investment, the no-withdrawals investment is much more risky than its withdrawable counterpart.
+%
+In the case of Swarm infrastructure, this could happen if, for example, the revenue that the investor could earn from his node permanently falls below the variable costs at which he is able to operate.
+%
+To take a tradfi analogy, a withdrawable stake position has returns like a loan, while a non-withdrawable position has returns more like a venture investment.
