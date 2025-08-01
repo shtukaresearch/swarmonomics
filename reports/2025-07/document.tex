@@ -1,0 +1,153 @@
+\maketitle
+%\thispagestyle{fancy}
+\section*{Overview}
+
+We continued to work in the context of multiple work streams from the project roadmap.\footnote{\url{https://github.com/shtukaresearch/swarmonomics/blob/main/2025-research-programme.md}}
+
+\begin{enumerate}
+\item \emph{Stake transparency.} Surface and publish Swarm metrics relevant to node operators. Make it easier to enter the NO market.
+
+The beta version of our Swarm stake dashboard is up!
+
+\begin{itemize}
+  \item \emph{Frontend.} Now using real data beginning from block 37339168 (2024-12-03), refreshed every hour! 
+  
+  {\small \url{https://bafybeidno4bvhxvm23hlhl7h2hhrgvga3a7kvylupanj4xmqy4x2mq6l2m.ipfs.dweb.link/}}
+  \item \emph{API.} \url{https://api.dash.swarm.shtuka.io/docs}
+\end{itemize}
+
+\item \emph{Alternative stake models.} Inspired by our data work on stake transparancy, explore alternative stake models that may be more `user-friendly' for node operators.
+
+We published a note that compares non-withdrawable and withdrawable stake mechanisms using a simple staker risk model. 
+
+\url{https://mirror.xyz/shtuka.eth/qQnVGyNL7viiS5iLizSVL_0eTTMYGavl3Kb77XiaBxk}
+
+\item \emph{Price dynamics.} We ran some preliminary statistical analyses on participation and price data collected for the dashboard.
+
+\end{enumerate}
+
+
+\section*{Project management}
+
+\subsection*{Completed Milestones}
+
+\begin{itemize}
+  \item 
+    Swarm staking data API and dashboard in beta.
+  \item
+    Deployed automated chain data indexer.
+  \item
+    Blog post exploring tradeoffs of some simplifications to staking, particularly enabling general stake withdrawals.
+  \item 
+    Preliminary review and discussion of SWIP-39.
+
+\end{itemize}
+
+\subsection*{Next milestones}
+
+\begin{itemize}
+  \item Study effect of freezing or slashing parameter on payoffs of consensus attacks.
+  \item Evaluate threat level of ghettoisation consensus attacks.
+  \item List mitigations for ghettoisation consensus attacks.
+  \item Develop modular approach to attain the objectives of SWIP-39.
+  \item Triage on SWIP-39 components.
+\end{itemize}
+
+\subsection*{Later milestones}
+\begin{itemize}
+  \item Statistical and dynamical systems analysis of price oracle.
+  \item Empirical study of node strategies.
+\end{itemize}
+
+
+\subsection*{Roadmap highlights}
+
+\paragraph{August} 
+%
+Review draft proposal SWIP-39 and propose upgrade paths.
+%
+Threat level assessment of ghettoisation strategies.
+%
+Explore mitigations.
+
+\paragraph{September onwards}
+%
+Econometric studies of price elasticities and responsiveness to volatility.
+%
+Pursue defined objectives for the price oracle mechanism.
+
+\paragraph{November}
+%
+Publication of semiannual report.
+
+
+\subsection*{Roadmap revisions}
+
+\begin{itemize}
+  \item Econometric studies pushed back to September.
+  \item Publication of our work on ghettoisation consensus attacks has been paused while we evaluate the security implications.
+\end{itemize}
+
+
+
+\section*{Findings}
+
+\subsection*{Estimating node health status}
+
+In Swarm today, there is no canonical way for a node to signal onchain that it is no longer participating in reward sharing.
+%
+This is unfortunate for new NOs wishing to enter the market who would benefit from knowing how much competition they can expect.
+%
+A simple proxy for `competitiveness' is the count of reveals per round over time. 
+%
+However, if an operator wishes to optimise their neighbourhood choice, they will want more refined information: how many of the nodes operating \emph{in that neighbourhood} are revealing each time they are selected.
+
+We pinned this down by introducing a notion of \emph{healthy} nodes. Roughly speaking, a node is healthy if it participated in the last round in which it could have participated.
+%
+More precisely, we say a staked node with overlay address $o$ and height\footnote{A node of height $h$ claims responsibility for $2^h$ neighbourhoods. See SWIP-21: \url{https://github.com/ethersphere/SWIPs/blob/master/SWIPs/swip-21.md}} $h$ is \emph{in proximity} in a given round $N$ if the following are satisfied:
+%
+\begin{enumerate}
+  \item The pot was successfully withdrawn in round $N$
+  \item If $d$ is the depth claimed by the consensus leader in round $N$, then $o$ is within proximity $d$ to the anchor for round $N$ (in the sense of sharing the first $d-h$ bits).
+\end{enumerate}
+%
+The node is said to be \emph{healthy} if it successfully revealed in the last round in which it was in proximity.
+%
+If no round in which the node was in proximity is found in the history, the node is presumed healthy.
+
+An endpoint delivering the list of nodes that are healthy in this sense is available on the API.
+%
+At time of writing, there are about 2400 addresses on this list --- substantially less than the 4096 that would be required by a healthy network at this size.
+%
+The figures deviate somewhat from the number implied by the daily reveals data on Swarm Foundation Research's redisitribution data dashboard, which suggests an active node population of around 2700 over most of the past month.\footnote{\url{https://dysordys.shinyapps.io/shinystats/}}
+
+There are other ways to forecast the future participation rate of the network as well as `health' of individual nodes.
+%
+We expect that a combination of factors could be used in practice to estimate future competition.
+%
+On the other hand, under a system of withdrawable stake, which currently seems like it may be in Swarm's future, this task becomes almost trivial: generally, nodes that no longer wish to participate will withdraw their stake.
+
+\subsection*{Alternative stake models}
+
+In our memo on the Swarm staking system,\footnote{\url{https://mirror.xyz/shtuka.eth/qQnVGyNL7viiS5iLizSVL_0eTTMYGavl3Kb77XiaBxk}} we found a number of advantages to enabling stake withdrawals.
+%
+Most notably, a withdrawable stake system greatly reduces the dependence of optimal stake strategies on risk tolerance, opening up the market to less the risk-tolerant --- or less well-capitalised --- operators.
+%
+This can only be a good thing for decentralisation and competitiveness.
+%
+We also expect that total stake will increase substantially if it becomes withdrawable.
+%
+Sweeping some details under the rug, the factor is about $(1+r)/r$ where $r$ is the rate of return demanded by a representative investor over their investment horizon.
+
+Meanwhile, another new staking model has been proposed, among other changes to participation, in a new draft SWIP-39.\footnote{\url{https://github.com/ethersphere/SWIPs/pull/74/files?short_path=9fe5d0d\#diff-9fe5d0d7ca5d074e8a24503bf5780cf666926b7f152920e89cc150e23dcad21c}}
+%
+Coincidentally, one of the proposed changes is to allow stake to be withdrawn.
+%
+Other changes include:
+%
+\begin{itemize}
+  \item Abandoning the proportional shares system in place at the moment in favour of a fixed revenue share --- with fixed stake requirement --- per node.
+  \item Via an onchain commit-reveal scheme, make it costly to reroll address generation. This cost could be controlled with an exit delay of the type discussed in our post.
+\end{itemize}
+%
+Shtuka Research will work closely with Swarm Foundation Research in the coming month to review and develop this proposal.
