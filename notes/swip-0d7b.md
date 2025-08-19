@@ -70,16 +70,20 @@ TODO
   * When withdrawal delays are introduced, liquidity is impacted.
 * The value of the principal gets added to the value of stake positions. This makes the value of staked BZZ comparable with other yield bearing assets such as treasuries. The market will likely accept a much lower yield per token ($r$ instead of $1+r$ ) and hence support a much larger deposit base ($Y/r$ instead of $Y/(1+r)$).
 * Staking becomes accessible to a wider variety of economic actors.
-* Currently, for a staked node sitting out of participation is disincentivised only by loss of revenue. Unstaking has the positive incentive of making capital immediately available, and implies sitting out of participation. So we have
-  $$
-  V(\neg \mathrm{P}) = O - R
-  $$
-  where $\mathrm{P}$ means "participate," $O$ is the variable operating cost of running the node, and $R$ is the revenue from participation. On the other hand,
-  $$
-  V(\mathrm{Unstake}) = LB(s) + O - R
-  $$
-   where $LB(s)$ is the liquidity bonus of having $s$ BZZ liquid instead of staked. Since instantly withdrawable stake is close to liquid, $LB(s)$ is likely to be pretty small here except in times of high trading activity when stakers may prefer to immediately trade their BZZ or post them as liquidity on an exchange.
-  In times of high trading activity (high volatility, high volume), instantly withdrawable stake therefore entails a risk of higher node churn and potential network instability.
+
+### Liquidity incentive
+
+Currently, for a staked node sitting out of participation is disincentivised only by loss of revenue. Unstaking has the positive incentive of making capital immediately available, and implies sitting out of participation. So we have
+```math
+V(\neg \mathrm{Participate}) = O - R
+```
+where $O$ is the variable operating cost of running the node and $R$ is the revenue from participation. On the other hand,
+```math
+V(\mathrm{Unstake}) = LB(s) + O - R
+```
+where $LB(s)$ is the liquidity bonus of having $s$ BZZ liquid instead of staked. Since instantly withdrawable stake is close to liquid, $LB(s)$ is likely to be pretty small here except in times of high trading activity when stakers may prefer to immediately trade their BZZ or post them as liquidity on an exchange.
+
+In times of high trading activity (high volatility, high volume), instantly withdrawable stake therefore entails a risk of higher node churn and potential network instability.
 
 ## Interactions with other proposals
 
