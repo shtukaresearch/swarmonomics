@@ -70,6 +70,7 @@ TODO
   * When withdrawal delays are introduced, liquidity is impacted.
 * The value of the principal gets added to the value of stake positions. This makes the value of staked BZZ comparable with other yield bearing assets such as treasuries. The market will likely accept a much lower yield per token ($r$ instead of $1+r$ ) and hence support a much larger deposit base ($Y/r$ instead of $Y/(1+r)$).
 * Staking becomes accessible to a wider variety of economic actors.
+* The main threat to network stability imposed by exiting nodes is the same as that of changing overlay or reducing height via the `manageStake` endpoint: the replication rate of an address block decreases. It is therefore natural that a measure applied to disincentivise one of these actions also be applied equally to the others. Currently, the only disincentive to `manageStake` is the 2 round participation freeze it induces, which cannot logically apply to exits. The current proposal therefore maintains approximate incentive parity between exiting and changing neighbourhood commitment.
 
 ### Liquidity incentive
 
