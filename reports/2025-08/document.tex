@@ -1,0 +1,171 @@
+\maketitle
+%\thispagestyle{fancy}
+\section*{Overview}
+
+We continued to build out our stake transparency dashboard, and also began work to support a project to overhaul Swarm's staking system.\footnote{\url{https://github.com/shtukaresearch/swarmonomics/blob/main/2025-research-programme.md}}
+
+\begin{enumerate}
+  \item \emph{Alternative stake models.} Begin building a roadmap to a revamped staking system.
+
+  Post a SWIP that provides a simple way to enable stake withdrawals.
+  
+  PR: \url{https://github.com/ethersphere/SWIPs/pull/77}
+  
+  \item \emph{Stake transparency.} Visual improvements to our staking dashboard at \url{https://beta.dash.swarm.shtuka.io}.
+  %
+  API now provides a list of neighbourhoods with their effective stake power, correctly accounting for height (area of responsibility multiplier).
+
+\end{enumerate}
+
+
+\section*{Project management}
+
+We have revisited our tactical priorities to better align with the current activities of the Swarm core developer and research community.
+%
+As of last month, the Swarm Foundation research team has begun work on an overhaul of the staking and incentive system.\footnote{\url{https://blog.ethswarm.org/foundation/2025/monthly-development-update-july-2025/}}
+
+\subsection*{Completed Milestones}
+
+\begin{itemize}
+  \item 
+    Sketch modular framework for stake upgrades, leveraging non-custodial stake model.
+  \item
+    Improvements and community feedback on Swarm staking dashboard.
+  \item
+    Author SWIP on enabling withdrawable stake.
+
+\end{itemize}
+
+\subsection*{Next milestones}
+
+\begin{itemize}
+  \item Quantify effect of inactivity leak and withdrawal delay parameter on network stability.
+  \item Flesh out migration-free stake registry upgrade model.
+  \item Analyse economic impact of per node stake limits.
+\end{itemize}
+
+\subsection*{Later milestones}
+\begin{itemize}
+  \item Statistical and dynamical systems analysis of price oracle.
+  \item Empirical study of node strategies.
+  \item Study effect of freezing or slashing parameter on payoffs of consensus attacks.
+  \item Evaluate threat level of ghettoisation consensus attacks.
+  \item List mitigations for ghettoisation consensus attacks.
+  \item Mathematical model for address allocation schemes and balancing.
+\end{itemize}
+
+
+\subsection*{Roadmap highlights}
+
+\paragraph{September--October}
+%
+Research support work for staking system revamp.
+
+\paragraph{November}
+%
+Publication of semiannual report.
+
+
+\subsection*{Roadmap revisions}
+
+\begin{itemize}
+  \item We have revisited our tactical priorities to better align with the current activities of the Swarm core developer and research community.
+  %
+  As of last month, the Swarm Foundation research team has begun work on an overhaul of the staking and incentive system.\footnote{\url{https://blog.ethswarm.org/foundation/2025/monthly-development-update-july-2025/}}
+  %
+  We are now prioritising research and SWIP authoring work in support of that goal.
+  
+  \item Econometric studies and our security work on ghettoisation has been put on hold until more resources become available.
+\end{itemize}
+
+
+
+\section*{Findings}
+
+\subsection*{Roadmap for improving Swarm's staking mechanism}
+
+The Swarm research community has embarked on a path to revamping Swarm's incentives to better align with participant expectations, streamline onboarding, improve observability, and hand core developers better tools to underwrite network stability.
+%
+This will likely involve numerous changes over several upgrade deployments.
+%
+We started mapping out some key research areas where Shtuka Research could provide support in this mission.
+
+\paragraph{Self-custodial stake registry}
+    %
+    Separate the upgrade path of stake account management from that of encumbrances and participation metadata.
+    %
+    Enable upgrades to participation metadata schema and account locking logic without asset migration.\footnote{For a sketch of an approach, slides from our presentation to Swarm Foundation research can be found at \url{https://assets.super.so/39e7899c-5b59-4143-a573-ea1301d7d10f/files/6403836d-9c7b-46d8-ae76-478b7bf3b8cc/Non-custodial_model_for_Swarm_staking.pdf}.}
+
+    \emph{Dependencies.}
+    %
+    Careful enumeration of current responsibilities of stake registry.
+    %
+    Design UX flow for frictionless upgrades.
+
+\paragraph{Enabling withdrawals.}
+    %
+    Unlock full stake withdrawal under normal network conditions without enabling exploits in the redistribution game.
+
+    \emph{Dependencies:} 
+    %
+    Validate tolerance for node churn or stake volatility that may occur as a result of enabling instant withdrawals.
+    %
+    May require throttling withdrawals.
+
+\paragraph{Throttling withdrawals.}
+    %
+    Add controls to slow down instant withdrawals and hence node churn, improving network stability.
+    
+    \emph{Dependencies:} 
+    %
+    Research to quantify desired throttling effect and how to optimise parameter settings to achieve it.
+    %
+    Requires negative incentives for unscheduled node inactivity.
+
+\paragraph{System defined stake threshold}
+    %
+    Introduce system defined stake threshold to reduce decision burden on node operators.
+
+    \emph{Dependencies.}
+    %
+    Research into economic impact of upper limits on stake deposits; see below.
+
+
+\subsection*{Stake liquidity}
+
+\emph{Stake liquidity} measures how easy it is to move BZZ tokens in and out of stake positions without substantial impact on per unit returns to stake.
+
+Abstractly, high stake liquidity may be desirable because it provides easy access to a share of network revenue, which in turn provides a fundamental value proposition for holding the token that is directly linked to the success of the network.
+%
+In the other direction, it allows the market to better absorb shocks such as sharp changes in volume which could affect the desirability of holding liquid BZZ.
+
+For a few reasons, Swarm's current staking system has extremely poor stake liquidity.
+%
+\begin{itemize}
+
+  \item \emph{Withdrawal restrictions.} Stake can only be withdrawn partially and under special market conditions, so there is essentially no sell-side liquidity (i.e.~no one is selling stake positions for liquid BZZ).
+  \item \emph{Operational hurdles.} One must run a node to stake. There is no system in place to delegate stake, or lend BZZ to node operators.
+  \item \emph{Adversarial behaviour.}
+    %
+    Revenue shares are determined in terms of stake per neighbourhood. 
+    %
+    Since neighbourhoods generally have few residents (the target being 4), adjusting stake has a large impact on the shares of other players and is likely to elicit an adversarial response. 
+    %
+    In order to maintain good relations with their peers, players may therefore be reluctant to put increased amounts of stake on their node. 
+    %
+    Consequently, despite being elective by construction, the stake system may end up simulating a fixed stake system with the target being an arbitrary Schelling point.
+\end{itemize}
+%
+These issues could be mitigated by enabling withdrawals more generally, introducing a delegated stake system or BZZ money market, and redesigning the revenue sharing scheme to takes into account global stake share instead of within-neighbourhood share.
+
+The concept of stake liquidity can help us express the economic impact of system-defined stake thresholds.
+%
+An upper limit on stake per node puts a hard limit on buy-side stake liquidity, limiting access to Swarm cash flows among BZZ holders. 
+%
+It couples the cost of scaling an investment in Swarm Network cash flows to the cost of adding physical infrastructure, as well as imposing an overall bound in terms of demand.
+
+On the other hand, in a highly liquid elective stake system, the market determines how much stake new operators must put down in order to earn a sufficient share of revenue to cover the network mean operating costs. 
+%
+This may be restrictive for operators with better access to physical infrastructure than BZZ capital, for example those planning to deploy using spare capacity on hardware they already own.
+%
+This hurdle could be addressed by introducing a highly accessible BZZ money market for stakers, or a stake delegation system.
