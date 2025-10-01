@@ -1,0 +1,185 @@
+\maketitle
+%\thispagestyle{fancy}
+\section*{Overview}
+
+We continued our research on a planned overhaul to Swarm's staking system, focusing on enabling stake withdrawals and the economic impacts of exit queues.\footnote{\url{https://github.com/shtukaresearch/swarmonomics/blob/main/2025-research-programme.md}}
+
+Aata visited the Solar Punk office and core Swarm Foundation members in a short residence at the Solar Punk offices in Budapest for closer collaboration on the BZZ tokenomic model and a possible email application.
+%
+The residence is ongoing at time of writing.
+
+Our stake transparency dashboard now has first class mobile support.
+
+\begin{enumerate}
+  \item \emph{Staking roadmap.} Continue work on enabling stake withdrawals.
+
+  After discussions on our stake withdrawal proposal from last month, the team is concerned about threats to network stability that could occur in the case of clustered node exits.\footnote{\url{https://github.com/ethersphere/SWIPs/pull/77}}
+  %  
+  We therefore launched an investigation into the idea of an \emph{exit queue}, a throttling mechanism which is used in Ethereum staking as an aid to stability.\footnote{\url{https://hackmd.io/@i79XZRmjR86P6AbhL0jwVQ/S1d7ClZ3ge}}
+
+
+  \item \emph{Budapest residency.} Aata visits the Solar Punk offices for a short residency and meetings with key Swarm Foundation personnel.
+  %
+  Objectives:
+  \begin{enumerate}
+    \item Align on goals of BZZ tokenomics
+    \item Align on protocol improvement roadmap
+    \item Discuss selected applications of Swarm storage with a view to market positioning
+  \end{enumerate}
+  
+\end{enumerate}
+
+\newpage
+\section*{Project management}
+
+We have revisited our tactical priorities to better align with the current activities of the Swarm core developer and research community.
+%
+As of last month, the Swarm Foundation research team has begun work on an overhaul of the staking and incentive system.\footnote{\url{https://blog.ethswarm.org/foundation/2025/monthly-development-update-july-2025/}}
+
+\subsection*{Completed Milestones}
+
+\begin{itemize}
+  \item Enumerate benefits and limitations of a general stake withdrawal queue construction.
+
+    
+\end{itemize}
+
+\subsection*{Next milestones}
+
+\begin{itemize}
+  \item Evaluate the benefits and limitations of applying a queue model to migrations or drawdowns.
+  \item Write concrete proposal (SWIP) for migration-free stake registry upgrade model.
+  \item Write concrete proposal (SWIP) for stake withdrawals with a simple exit queue.
+\end{itemize}
+
+\subsection*{Later milestones}
+\begin{itemize}
+  \item Statistical and dynamical systems analysis of price oracle.
+  \item Empirical study of node strategies.
+  \item Study effect of freezing or slashing parameter on payoffs of consensus attacks.
+  \item Evaluate threat level of ghettoisation consensus attacks.
+  \item List mitigations for ghettoisation consensus attacks.
+  \item Mathematical model for address allocation schemes and balancing.
+  \item Look into the benefits and limitations of an inactivity leak penalty.
+\end{itemize}
+
+
+\subsection*{Roadmap highlights}
+
+\paragraph{October}
+%
+Research support work for staking system revamp.  
+%
+Prepare SWIPs for exit queue based withdrawals and self-custodial stake registry.
+
+\paragraph{November}
+%
+Finalize stake registry SWIPs in time for Devconnect Argentina (17--22).
+%
+Publication of semiannual report.
+
+
+\section*{Findings}
+
+\subsection*{Roadmap for improving Swarm's staking mechanism}
+
+The Swarm research community has embarked on a path to revamping Swarm's incentives to better align with participant expectations, streamline onboarding, improve observability, and hand core developers better tools to underwrite network stability.
+%
+This will likely involve numerous changes over several upgrade deployments.
+%
+We started mapping out some key research areas where Shtuka Research could provide support in this mission.
+
+\paragraph{Streamline incentive system upgrade path}
+    %
+    Separate the upgrade path of stake account management from that of encumbrances (locks) and participation metadata.
+    %
+    Enable upgrades to participation metadata schema and account locking logic without asset migration.\footnote{For a sketch of an approach, slides from our presentation to Swarm Foundation research can be found at \url{https://assets.super.so/39e7899c-5b59-4143-a573-ea1301d7d10f/files/6403836d-9c7b-46d8-ae76-478b7bf3b8cc/Non-custodial_model_for_Swarm_staking.pdf}.}
+
+    Improve upgrade UX for both protocol engineers and node operators.
+
+    \emph{Dependencies.}
+    %
+    Careful enumeration of current responsibilities of stake registry.
+    %
+    Design UX flow for frictionless upgrades.
+
+\paragraph{Enable withdrawals.}
+    %
+    Unlock full stake withdrawal under normal network conditions.
+    %
+    Control the speed of withdrawals (and migrations) with a queue.
+
+    \url{https://hackmd.io/@i79XZRmjR86P6AbhL0jwVQ/S1d7ClZ3ge}
+
+    \emph{Dependencies:} 
+    %
+    Validate tolerance for node churn or stake volatility that may occur as a result of enabling instant withdrawals.
+
+    Research to quantify desired throttling effect and how to optimise parameter settings to achieve it.
+    %
+    May need negative incentives for unscheduled node inactivity.
+
+\paragraph{Simplify node operator strategies}
+    %
+    Currently, Swarm node operators face a confusing decision of how much BZZ to stake and into which neighbourhoods.
+    %
+    Because neighbourhood populations are small, the mechanism is potentially adversarial — the optimal strategy depends on how the staker believes the other participants in the neighbourhood will respond.
+
+    We consider two proposals to address this:
+    %
+    \begin{enumerate}
+      %
+      \item Have the network dictate a fixed amount of stake per node.
+
+      \emph{Advantages.} Clearly simplifies staker decisioning. Optimal strategy is to run as many nodes as you can based on current operating costs (including cost of stake capital) and revenue. Since all nodes are supposed to do the same amount of work and provide the same value, requiring the same amount of collateral to be attached to each node is intuitively reasonable.
+
+      \emph{Disadvantages.} NOs still need to strategise in order to get their nodes allocated into neighbourhoods without overpopulating them. Limits TVL growth per unit demand. Place additional burden on system designers to pick the fixed amount. May create incentive to Sybil via a deduplication attack.
+
+      \item Calculate revenue shares based on global stake share, not per-neighbourhood share.
+
+      \emph{Advantages.} Maximise stake liquidity. For all but the largest stakers, optimal strategy is simply to stake as much BZZ as you want to expose to Swarm Network revenue at the available ROI.
+
+      \emph{Disadvantages.} Auxiliary system needed to compensate node operators for work, link stake collateral to nodes for the sake of applying penalties, and ensure balancing.
+    \end{enumerate}
+
+    \emph{Dependencies.}
+    %
+    Research into mechanisms to automate allocation of nodes to neighbourhoods (or allocate overlay addresses directly).
+    %
+    Research into balancing properties of node overlay address populations.
+
+
+\paragraph{Evaluate consensus-level threats}
+%
+Swarm's method for achieving consensus over the network depth and chunk index depends on a non-standard single-round leader-based algorithm and, because it is weighted on a per-neighbourhood basis, has very low Sybil resistance.
+%
+We have found potential weaknesses to this consensus system which may threaten desired properties of Swarm Network such as censorship-resistance.
+
+\subsection*{Exit queues}
+
+In a research memo on exit queues, we explore the following ideas:
+%
+\begin{itemize}
+  \item \emph{Benefits of exit queues.}
+  \begin{enumerate}
+    \item Reduce reaction time.
+    \item Filter vol spikes.
+    \item Pre-emptive price adjustment.
+    \item Hard limit churn rate.
+  \end{enumerate}
+  \item \emph{Costs of exit queues.}
+  Longer or more risky exit queues reduce the attractiveness of stake positions as an investment. 
+  %
+  Thus, implementing a long or uncertain exit queue imposes a penalty on network TVL which can be quantified in terms of a discount factor $\mathbb{E}[\beta^T]$, where $T\in^\$[0,\infty)$ is the wait time.
+  \item \emph{Constructions of queue discplines.} 
+    We discussed trivial examples (instant withdrawals, no withdrawals), clock-based, random draw based, throughput-based, and onramp discounting queues.
+    %
+    Queue disciplines can be combined using logical operators.
+    %
+    For evaluating the case of AoR migration or reduction queues, we might want to consider neighbourhood-specific conditionals.
+
+  \item \emph{Limitations of exit queues.} Exit queues only work if node operators decide to use them. This depends on how costly the operator expects it to be to wait for the queue conditions compared to whatever penalties are incurred for an unannounced exit.
+
+\end{itemize}
+%
+For full details, see \url{https://hackmd.io/@i79XZRmjR86P6AbhL0jwVQ/S1d7ClZ3ge}.
