@@ -1,0 +1,166 @@
+\maketitle
+%\thispagestyle{fancy}
+\section*{Overview}
+
+We continued to flesh out and communicate our research surrounding stake withdrawals and wait periods.
+
+\begin{enumerate}
+  \item \emph{Withdrawals and stake record updates.} 
+    We carried out further research on the market context and prior art with regard to withdrawal wait periods, a.k.a.~notification periods, and queueing rules.
+
+  \item \emph{Storage pricing.}
+    We published a clear statement of the problem of storage price variability and outlined strategies to quantify and resolve.
+    %
+    \url{https://github.com/ethersphere/SWIPs/issues/86}
+    %
+    We've also planned a project to evaluate performance of the current system — this is pending approval by the Foundation.
+
+  \item \emph{Protocol strategy.}
+    We continued talks with SF leadership on key role and process definitions and filling in the blanks in strategy formulation.
+
+  \item \emph{Big nodes.}
+    We started a fork of bee to remove scaling limits and began experimenting with a mainnet deployment at 4x capacity (contributing 64G of storage).
+    %
+    \url{https://github.com/shtukaresearch/bee/tree/remove-doubling-limit}
+
+\end{enumerate}
+
+\section*{Project management}
+
+\subsection*{Completed Milestones}
+
+\begin{itemize}
+  \item Protocol strategy: Deliver recommendations for protocol development objectives and key metrics.
+  \item Stake withdrawals: Finalise SWIPs for stake withdrawals and stake record management (logic).
+  \item Storage pricing: Clearly state problem of storage price variability and outline strategies to quantify and resolve.
+  \item Storage pricing: Scope out research project to evaluate performance of existing price quoting mechanism.
+\end{itemize}
+
+\subsection*{Next milestones}
+
+\begin{itemize}
+  \item Stake withdrawals: Finalise parameter choices for stake withdrawal and stake record update notification periods.
+  \item Storage pricing: Performance analysis of price oracle
+  \item Protocol strategy: Define Shtuka's contribution for the next six months.
+  \item Protocol strategy: Define processes for final review and deployment of withdrawals SWIPs.
+  \item Protocol strategy: Define processes for framing and generating solutions to pricing DX issues.
+  \item Big nodes: Establish framework for converting findings into contributions back into mainline bee
+\end{itemize}
+
+\subsection*{Later milestones}
+\begin{itemize}
+  \item Migration-free stake registry: triage and concrete proposal.
+  \item Negative incentives: explore and evaluate solutions.
+  \item Empirical study of node strategies.
+  \item Consensus attacks: analyse variants, evaluate threat level, list mitigations.
+  \item Node dispersion: build mathematical model for address allocation schemes and node dispersion.
+\end{itemize}
+
+
+\subsection*{Roadmap highlights}
+
+\paragraph{March}
+%
+\emph{Protocol strategy.} 
+%
+Pin down and align on mission objectives and select metrics for Research/Protocol team tracking and targets.
+%
+Define Shtuka's contribution for the next six months.
+%
+Define expectations for how withdrawals SWIPs will be processed.
+%
+Define expectations for how price stability UX issue can be addressed.
+
+\emph{Withdrawals.} Write parameter SWIP to define wait periods for stake record updates and withdrawals. Testing strategy for SWIP-40.
+
+\emph{Big nodes.} Continue exploration and optimisation of deployment of big (4x or more) nodes on resource constrained instances.
+
+\paragraph{April onwards}
+%
+To be defined in the coming month.
+
+
+\section*{Current work}
+
+\subsection*{Stake withdrawals and stake record update queue}
+
+We did some market research into how withdrawals with wait periods are processed in tradfi and other token-based staking platforms such as PoS blockchains or DeFi vaults.
+%
+We found a wide range of terminology, rationales, wait period lengths, and implementation details such as whether funds remain productive during the wait period.
+%
+By way of illustration, here is Claude's attempt at a taxonomy of account update wait periods:
+%
+\begin{itemize}
+\item \textbf{Deposit holds} — funds accepted but not yet available (e.g. bank check holds under Reg CC)
+\item \textbf{Activation queues} — deposit accepted but not yet earning or participating (e.g. Ethereum validator activation)
+\item \textbf{Lock-ups} — funds committed for a fixed term, no early exit (e.g. CDs, veCRV, hedge fund hard lock-ups)
+\item \textbf{Notice periods} — withdrawal requires advance notice, funds remain productive during the wait (e.g. UK notice savings accounts)
+\item \textbf{Cooldowns} — fixed delay after requesting withdrawal before funds are released (e.g. Ethena 7-day cooldown, Chainlink 28-day cooldown)
+\item \textbf{Unbonding periods} — staked tokens enter a non-productive limbo state before becoming liquid (e.g. Cosmos 21 days, Polkadot 28 days, TheGraph 28 days)
+\item \textbf{Exit queues} — withdrawals processed in order, wait time depends on total demand (e.g. Ethereum validator exit queue, Lido FIFO queue)
+\item \textbf{Redemption gates} — cap on total withdrawals per period (e.g. hedge fund 5-25\% gates)
+\item \textbf{Liquidity-dependent withdrawal} — no time delay, but withdrawal blocked if insufficient idle funds (e.g. Aave, Morpho)
+\item \textbf{Graduated escrow} — withholding schedule that scales with tenure, released on graceful exit (e.g. Storj)
+\item \textbf{Sliding-scale exit fee} — fixed delay with option to pay a fee for early release, fee decreasing over time (e.g. AR.IO)
+\item \textbf{Reward vesting} — rewards locked on a schedule independent of the principal (e.g. Filecoin 180-day linear vest, Synthetix 1-year escrow)
+\end{itemize}
+%
+These are not mutually exclusive. A single withdrawal may pass through multiple stages (e.g. EigenLayer: 7-day escrow + Ethereum exit queue + 27-hour withdrawal delay).
+
+Clearly, terminology alone provides plenty of room for confusion or misunderstanding about how these wait periods affect stakers.
+
+\paragraph{Out-of-order execution}
+%
+One of the most intuitively reasonable out-of-order execution rules is to allow deposits to an account in which a withdrawal is pending.
+%
+Since deposits and withdrawals commute, out-of-order execution is less likely to result in unexpected outcomes.
+%
+In terms of implementation, perhaps the simplest approach to this rule is to provision separate lanes for withdrawals and despoits — this is how ETH staking works.
+%
+Separate withdrawal and deposit queues seems to be a common provision.
+
+Another question is whether it should be possible to enqueue withdrawal of tokens that have just been deposited but not yet registered. 
+%
+Since the deposit wait is expected to remain very short compared to withdrawal, from an incentive or UX perspective the answer to this question isn't very important.
+%
+From an implementation perspective, it is easier not to allow it; then the validity check for declaring a withdrawal only has to read the registered balance, not the queue.
+
+\paragraph{Stake commitment updates}
+%
+Swarm stake deposits are associated with \emph{commitments} that defines the address range over which the owner commits to store data.
+%
+Commitments are chosen on stake creation, but may also be updated at any time, subject to a 2-round freeze (which SWIP-41 would replace with a notification period).
+%
+Even if commitment updates on existing stake positions were not allowed, node operators could anyway change their commitments by exiting one node, waiting for the withdrawal delay period, and creating another with the same funds.
+%
+Allowing direct updates on a live stake position can therefore be regarded as a `shortcut' to the exit-and-redeploy combo.
+
+This perspective is useful for reasoning about delays to enforce on changes to these fields of the stake record.
+%
+For example:
+%
+\begin{itemize}
+  \item A height (reserve capacity doubling) increase \emph{expands} the node's storage commitment (albeit potentially diluting the amount of stake held per unit capacity).
+    %
+    It's intuitively reasonable that height increase requests be processed significantly faster than exit-and-redeploy.
+
+  \item A height decrease \emph{reduces} the node's storage commitment, exiting them from more distant address ranges (albeit potentially increasing stake held per unit capacity).
+    %
+    From the perspective of the address ranges that fall outside the reduced commitment, this has the same impact on service as a node exit.
+    %
+    Therefore we see no reason that height reductions be treated preferentially to exit-and-redeploy.
+\end{itemize}
+
+\subsection*{Big nodes}
+%
+One of the easiest wins available for scaling Swarm's supply side is to raise the scaling limits on client implementations, allowing single nodes to provide more storage than the default 16GiB.
+%
+To evaluate viability of the bee implementation for big nodes, we started a fork of the bee codebase and deployed a 4x node — the next step above the current limit in production bee — to mainnet for observations.
+
+Increasing the storage commitment of a Swarm node implies that the node will be selected to provide storage proofs more often, but does not change the amount of data that must be proved on each challenge, which remains between 8 and 16 GiB.
+%
+Ideally, then, the compute requirements should remain flat even as the node scales. 
+%
+However, in practice scanning the scaled backing store does lead to O(N) I/O consumption.
+%
+We're hacking on ways to optimise this I/O away. 
