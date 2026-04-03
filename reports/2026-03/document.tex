@@ -1,0 +1,207 @@
+\maketitle
+%\thispagestyle{fancy}
+\section*{Overview}
+
+We continued to flesh out and communicate our research surrounding stake withdrawals and wait periods.
+
+\begin{enumerate}
+  \item \emph{Protocol strategy.}
+    Swarm Foundation has adopted our recommendation of appointing a \emph{protocol lead} responsible for coordinating and driving decision-making around protocol changes.
+    %
+    We have submitted a concrete implementation plan for the new \emph{SWIP process} and are in talks with the incoming protocol lead to discuss how to execute on it.
+
+    Work on nailing down the specifics of \emph{protocol strategy} is ongoing. The next step is to organise the project needs in terms of a standardised \emph{vision–mission–strategy–roadmap} hierarchy.
+
+  \item \emph{Withdrawals and stake record updates.} 
+    Our work on enabling stake withdrawals with wait period for Swarm is entering the implementation phase. The proposal includes a design for an onchain scheduler that interleaves withdrawals, deposits, and “shortcut” service commitment alterations such as capacity expansion.
+
+    \url{https://assets.super.so/39e7899c-5b59-4143-a573-ea1301d7d10f/files/d7a39a4a-ae2a-4e43-b445-6b654ae19bac/00-stake-registry-scheduler.pdf}
+
+  \item \emph{Big nodes.}
+    Our 4x capacity (64G) node is working on mainnet with network-attached storage and a modified sampling algorithm.
+    %
+    The setup fails at 8x; more research is required.
+
+\end{enumerate}
+
+\section*{Project management}
+
+\subsection*{Completed tasks}
+
+All in-progress tasks are still ongoing. Most are blocked on further clarification of the protocol strategy and onboarding the incoming protocol lead.
+
+\subsection*{Ongoing tasks}
+
+\begin{itemize}
+  \item Stake withdrawals: Finalise parameter choices for stake withdrawal and stake record update notification periods.
+  \item Stake withdrawals: Implementation of test suite
+  \item Protocol strategy: Define Shtuka's contribution for the next six months. (This task is awaiting the start date of the incoming protocol lead.)
+  \item Protocol strategy: Define processes for final review and deployment of withdrawals SWIPs.
+  \item Protocol strategy: Define processes for framing and generating solutions to pricing DX issues.
+\end{itemize}
+
+\subsection*{Later tasks}
+\begin{itemize}
+  \item Migration-free stake registry: triage and concrete proposal.
+  \item Negative incentives: explore and evaluate solutions.
+  \item Consensus attacks: analyse variants, evaluate threat level, list mitigations.
+  \item Node dispersion: build mathematical model for address allocation schemes and node dispersion.
+  \item Big nodes: Establish framework for converting findings into contributions back into mainline bee
+  \item Storage pricing: Performance analysis of price oracle
+\end{itemize}
+
+
+\subsection*{Roadmap highlights}
+
+\paragraph{April}
+%
+\emph{Protocol strategy.} 
+%
+Organise Swarm Network needs according to a structured hierarchy.
+%
+Classify planned and future protocol initiatives by the needs that they serve and facilitate triage.
+%
+Define Shtuka's contribution for the next six months.
+%
+Define expectations for how price stability UX issue can be addressed.
+
+\emph{Withdrawals.} Align with implementation team on details of withdrawals SWIPs. Write parameter SWIP to define wait periods for stake record updates and withdrawals. Testing strategy for SWIP-40.
+
+\paragraph{May onwards}
+%
+To be defined in the coming month.
+
+\newpage
+\section*{Current work}
+
+\subsection*{Protocol strategy}
+%
+To coordinate future protocol updates, Swarm will need a framework to classify and triage initiatives by matching them to Swarm Network needs.
+%
+We propose the following ``pillars'':
+
+\begin{itemize}
+  \item \textbf{Aligning operator incentives.} 
+    Calibrate incentives so as to ensure that the Swarm Network can store data safely and durably and serve retrievals with adequate performance for an origin storage use case, even if the Swarm Foundation does not operate any nodes.
+  \item \textbf{Improve competitiveness of user-facing economic model.} 
+    Identify realistic user/builder expectations about price level and predictability. Reduce cost drivers (while maintaining adequate performance and safety) and calibrate pricing mechanisms to a competitive range.
+  \item \textbf{Reducing integration frictions.} 
+    For protocol-level integration points such as onchain, improve DX by identifying and mitigating or eliminating frictions.
+  \item \textbf{Measure and improve censorship resistance.} 
+    Identify major failure modes of the storage service, whether unintentional or intentional and assess likelihood of each. 
+  \item \textbf{Staker experience.} 
+    Make it easier, safer, and more attractive to stake BZZ to earn mission-aligned ROI.
+
+    (Enabling withdrawals and big nodes both contribute here.)
+\end{itemize}
+
+\subsection*{Withdrawals}
+
+The scheduler design tracks stake balances using a breakdown into registered, onramping, offramping, and deregistered components (Figure~\ref{fig:balance-breakdown}).
+%
+Only registered balance contributes to revenue redistribution share.
+%
+Offramping balance must wait some time --- currently, we're thinking 28 days --- before tokens can actually be withdrawn.
+%
+During that time it is still productive, i.e.~continues to earn revenue share.
+%
+Deregistered tokens are unproductive: they're just sitting in the contract waiting to be withdrawn at any time (except while frozen, see below).
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=0.5\textwidth]{stake-balance-breakdown}
+  \caption{Stake balance breakdown by registration status.}
+  \label{fig:balance-breakdown}
+\end{figure}
+
+\
+
+Several subtle design questions about how to handle interleaved wait and freeze periods were resolved.
+%
+The first set is about handling requests that arrive while the node is already waiting to exit.
+%
+Figure~\ref{fig:interleave-exit} illustrates two scenarios: scheduling an overlay change and scheduling a top-up while an exit is pending.
+%
+Allowing scheduled operations that would execute after an exit and end up being invalidated is clearly nonsensical.
+%
+Allowing operations that are scheduled and execute out-of-order before an exit is meaningful, but increases complexity and doesn't seem to enable any desirable behaviours.
+%
+For simplicity our design disallows both: once an exit is scheduled, no other operations can be interleaved.
+
+\begin{figure}[ht]
+  \centering
+  \begin{subfigure}[b]{\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{schedule-something-while-exiting}
+    \caption{Scheduling an overlay change while waiting to exit.}
+    \label{fig:overlay-while-exiting}
+  \end{subfigure}
+
+  \vspace{1em}
+
+  \begin{subfigure}[b]{\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{schedule-execute-something-while-exiting}
+    \caption{Scheduling a top-up while waiting to exit.}
+    \label{fig:topup-while-exiting}
+  \end{subfigure}
+  \caption{Interleaving other operations with a pending exit.}
+  \label{fig:interleave-exit}
+\end{figure}
+
+Another is whether a node that has been frozen due to a consensus fault can schedule or execute a withdrawal.
+%
+If scheduling is allowed while frozen (Figure~\ref{fig:schedule-frozen-yes}), the withdrawal wait runs concurrently with the remaining freeze; 
+%
+otherwise the user must wait to add the operation to the schedule, then wait again to execute.
+%
+Allowing the waits to be concurrent does not invalidate the penalty effect of freezing or the filtering effect of a minimum wait period, so we allow interleaving in this case.
+
+\begin{figure}[ht]
+  \centering
+  \begin{subfigure}[b]{\textwidth}
+    \centering
+    \includegraphics[width=0.85\textwidth]{can-schedule-withdrawal-while-frozen}
+    \caption{Can schedule withdrawal while frozen.}
+    \label{fig:schedule-frozen-yes}
+  \end{subfigure}
+
+  \vspace{1em}
+
+  \begin{subfigure}[b]{\textwidth}
+    \centering
+    \includegraphics[width=0.85\textwidth]{cannot-schedule-withdrawal-while-frozen}
+    \caption{Cannot schedule withdrawal while frozen.}
+    \label{fig:schedule-frozen-no}
+  \end{subfigure}
+  \caption{Scheduling a withdrawal while frozen: two design options.}
+  \label{fig:schedule-while-frozen}
+\end{figure}
+
+Similarly, if a withdrawal was already scheduled before the freeze, a question is whether the node can execute it while still frozen.
+%
+If execution is allowed (Figure~\ref{fig:execute-frozen-yes}), a node that is nearing the end of a wait to exit or withdraw faces nearly no penalty for the freeze. They may simply execute the withdrawal and redeposit under a new record, essentially evading the freeze.
+%
+Clearly, nodes should not be able to evade freeze penalties via ``exit scams,'' so this is \textbf{not} allowed.
+
+\begin{figure}[ht]
+  \centering
+  \begin{subfigure}[b]{\textwidth}
+    \centering
+    \includegraphics[width=0.85\textwidth]{can-execute-withdrawal-while-frozen}
+    \caption{Can execute withdrawal while frozen.}
+    \label{fig:execute-frozen-yes}
+  \end{subfigure}
+
+  \vspace{1em}
+
+  \begin{subfigure}[b]{\textwidth}
+    \centering
+    \includegraphics[width=0.85\textwidth]{cannot-execute-withdrawal-while-frozen}
+    \caption{Cannot execute withdrawal while frozen.}
+    \label{fig:execute-frozen-no}
+  \end{subfigure}
+  \caption{Executing a withdrawal while frozen: two design options.}
+  \label{fig:execute-while-frozen}
+\end{figure}
+
