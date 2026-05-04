@@ -1,0 +1,132 @@
+\maketitle
+%\thispagestyle{fancy}
+\section*{Overview}
+
+The month's work was dominated by the Swarm Hackdays in Budapest (April 20–24), during which we spent time developing novel infrastructure primitives and aligning with the incoming Protocol Lead on priorities for the Foundation.
+
+\begin{enumerate}
+  \item \emph{Protocol strategy.}
+    We spent the month helping to onboard and align with the Foundation's incoming Protocol Lead on priorities and processes.
+
+  \item \emph{Withdrawals and stake record updates.} 
+    Implementation of stake withdrawals and the stake record update scheduler is complete. It was implemented by 0xCardiE from Swarm Foundation and validated against a test suite developed by Andrew.
+
+    The final specification is split into two parts:
+    \begin{enumerate}
+      \item \href{https://github.com/awmacpherson/SWIPs/blob/return-to-single-parameter-stake-record/SWIPs/swip-return-to-single-parameter-stake-record.md}{Revert SWIP-20}
+      \item \href{https://github.com/awmacpherson/SWIPs/blob/swip-40-41-combined/SWIPs/swip-40\%2B41.md}{Withdrawals and exit queue}
+    \end{enumerate}
+
+    The implementation PR is here: \url{https://github.com/ethersphere/storage-incentives/pull/309}.
+
+  \item \emph{Swarm hackweek.}
+    At a week-long in-person meetup and hackathon in Budapest, we built the \emph{Swarm Volume API} which makes buying Swarm storage more convenient with a good-til-cancelled, recurring charge based payment model.
+
+    Point your agent at \url{https://volume-api.omnipin.eth.link} to check it out.
+
+\end{enumerate}
+
+\section*{Project management}
+
+\subsection*{Completed tasks}
+
+\begin{itemize}
+  \item Stake withdrawals: Finalise parameter choices for stake withdrawal and stake record update notification periods.
+  \item Stake withdrawals: Implementation and review of contract changes.
+\end{itemize}
+
+\subsection*{Ongoing tasks}
+
+\begin{itemize}
+  \item Protocol strategy: Define Shtuka's contribution for the next six months. (This task is awaiting the start date of the incoming protocol lead.)
+  \item Protocol strategy: Define strategy for framing and generating solutions to pricing DX issues.
+\end{itemize}
+
+\subsection*{Later tasks}
+\begin{itemize}
+  \item Migration-free stake registry: triage and concrete proposal.
+  \item Negative incentives: explore and evaluate solutions.
+  \item Consensus attacks: analyse variants, evaluate threat level, list mitigations.
+  \item Node dispersion: build mathematical model for address allocation schemes and node dispersion.
+  \item Big nodes: Establish framework for converting findings into contributions back into mainline bee
+  \item Storage pricing: Performance analysis of price oracle
+\end{itemize}
+
+
+\subsection*{Roadmap highlights}
+
+\paragraph{May}
+%
+\emph{Protocol strategy.} 
+%
+Organise planned protocol initiatives in terms of the current priorities.
+%
+Define Shtuka's contribution for the next six months.
+%
+Define strategy for working towards a pricing model that gives devs confidence in their costs over months or years.
+
+\emph{Withdrawals.} Align with implementation team on deployment of withdrawals enabled stake registry.
+
+\paragraph{June onwards}
+%
+To be defined in the coming month.
+
+\newpage
+\section*{Current work}
+
+\subsection*{Protocol strategy}
+%
+The Foundation defined four headlines under which to organise its priorities, of which the most important was \emph{traction}.
+%
+We recast our work categories from last time under two of these headlines.
+
+\begin{itemize}
+  \item \textbf{Traction}.
+  \begin{itemize}
+    \item \textbf{Improve competitiveness of user-facing economic model.} 
+      Identify realistic user/builder expectations about price level and predictability. Reduce cost drivers (while maintaining adequate performance and safety) and calibrate pricing mechanisms to a competitive range.
+    \item \textbf{Reducing integration frictions.} 
+      For protocol-level integration points such as onchain, improve DX by identifying and mitigating or eliminating frictions.
+    \item \textbf{Staker experience.} 
+      Make it easier, safer, and more attractive to stake BZZ to earn mission-aligned ROI.
+      (Enabling withdrawals and big nodes both contribute here.)
+  \end{itemize}
+  \item \textbf{Robustness}. 
+  \begin{itemize}
+    \item \textbf{Aligning operator incentives.} 
+      Calibrate incentives so as to ensure that the Swarm Network can store data safely and durably and serve retrievals with adequate performance for an origin storage use case, even if the Swarm Foundation does not operate any nodes.
+    \item \textbf{Measure and improve censorship resistance.} 
+      Identify major failure modes of the storage service, whether unintentional or intentional and assess likelihood of each. 
+  \end{itemize}
+
+\end{itemize}
+
+\subsection*{Withdrawals}
+
+Two things happened:
+\begin{itemize}
+  \item Settled on 28 day notification period for drawing down or exiting a stake position, minimum 2-round delay for all other actions. A separate named parameter is introduced for overlay change notice period in case it is later decided to increase it.
+  \item Reviewed implementation by Foundation Team using independently developed test suite. Final refinements of spec.
+\end{itemize}
+
+\subsection*{Volumes}
+
+The Swarm Foundation hackweek in Budapest ran from 20th to 24th April.
+%
+During the week, we designed and built the \emph{Volumes API} (originally titled the \emph{subscriptions registry}) to bring automatically persisting storage quotas to Swarm.
+%
+Persisting volumes only requires that the Volume Registry smart contract be triggered regularly by a stateless ``keeper'' bot, costing only nominal gas fees. 
+%
+Consequently, the service has a 1-of-N liveness model.
+
+A Volume Registry deployment is live on Gnosis chain today. 
+%
+We're running an altruistic keeper bot, but we suggest you run your own too — it's a one-line cron job that can be run for free in your favourite cloud serverless environment.
+
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=\textwidth]{volume-registry}
+  \caption{Volume registry architecture.}
+\end{figure}
+
