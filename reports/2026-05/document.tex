@@ -1,0 +1,154 @@
+\maketitle
+%\thispagestyle{fancy}
+\section*{Overview}
+
+After consultation with the incoming Protocol Lead, it was established that the Swarmonomics programme will concentrate efforts on addressing the \emph{price stability problem}.
+%
+We continue to chase the withdrawals SWIPs through the approval, testing, and deployment pipeline.
+
+\begin{enumerate}
+  \item \emph{Price stability.}
+    We started our research and protocol improvement programme to address Swarm's longstanding price stability UX challenges.
+
+  \item \emph{Withdrawals and stake record updates.} 
+    The SWIP is under final review for economic impact.
+    %
+    A discussion was reopened as to whether the withdrawal wait period should be 28 or 14 days.
+
+\end{enumerate}
+
+\section*{Project management}
+
+\subsection*{Completed}
+
+\begin{itemize}
+  \item Protocol strategy: Define strategy for framing and generating solutions to pricing DX issues.
+\end{itemize}
+
+\subsection*{Ongoing}
+
+\begin{itemize}
+  \item Protocol strategy: Define Shtuka's contribution for the next six months.
+  \item Price stability: research into history of cloud object storage pricing.
+\end{itemize}
+
+\subsection*{Upcoming}
+
+\begin{itemize}
+  \item Price stability: Develop risk model for supply-side stability under pricing changes
+  \item Price stability: Develop user-facing price stability objectives framework. 
+  \item Price stability: Initial parametrisation of price controller design space. Map pricing contract admin surface.
+\end{itemize}
+
+\subsection*{Backlog}
+\begin{itemize}
+  \item Migration-free stake registry: triage and concrete proposal.
+  \item Negative incentives: explore and evaluate solutions.
+  \item Consensus attacks: analyse variants, evaluate threat level, list mitigations.
+  \item Node dispersion: build mathematical model for address allocation schemes and node dispersion.
+  \item Big nodes: Establish framework for converting findings into contributions back into mainline bee
+\end{itemize}
+
+
+\section*{Current work}
+
+\subsection*{Price stability}
+%
+We attack the work in three workstreams:
+\begin{enumerate}
+  \item \emph{What do we want to happen?} Identify user and supplier needs, turn them into metrics, objectives, and thresholds.
+  \item \emph{What has been happening?} Measure and analyse metrics from Swarm and the wider market.
+  \item \emph{How do we get to our objectives?} Solution generation and evaluation.
+\end{enumerate}
+%
+To establish context for objective setting, this month we dug around in the web archive to put together a brief history of cloud object storage pricing.
+
+
+\paragraph{What has been happening: Cloud storage pricing history}
+%
+We reconstructed historic price evolution by trawling through blog posts, repricing announcements, and archived pricing pages from each year since cloud storage began in 2006.
+
+Main findings:
+\begin{itemize}
+\item The main fees of cloud object storage are capacity rent (priced in units of capacity-time, typically GiB-month) and egress (priced in units of capacity).
+\item Since AWS S3, the first object storage service, launched in 2006 the history of these prices has generally been constant for many years with occasional reductions. No service changes prices more often than once per year.
+\item Since 2022 there have been some exceptional price rises, especially among smaller or specialised providers, attributable to global supply and demand shocks and, perhaps, plateauing efficiency.
+\item Mostly no formal guarantees against price hikes. Services build trust through their track record.
+\end{itemize}
+
+For more detailed notes with links to fully referenced agent reports (with URLs to archived pricing pages), see \url{https://github.com/shtukaresearch/swarmonomics/blob/main/notes/price-stability/history-cloud-object-storage.md}.
+
+\paragraph{What do we want to happen?}
+
+Next month our priority will be building a framework for objective setting.
+%
+Our objectives have to balance potentially competing requirements of optimising price predictability for users while allowing enough flexibility for the operator set to absorb market shocks without impacting service stability.
+
+\begin{itemize}
+\item 
+  Develop user-facing price stability objectives framework. 
+
+  Na\"ively, we should set UX goals for the protocol based on what users probably expect based on the history of object storage pricing.
+  %
+  However, we expect it is too na\"ive to imagine that operators can always absorb as much pricing risk as a traditional cloud operator; there is a gap in the market for price stabilising intermediaries.
+  %
+  So there could be another layer of intermediate price objectives: make protocol-level pricing stable enough to attract a robust intermediary population.
+  %
+  To set reasonable objectives, we need to better understand what it takes — operational costs, margin, and ready cash — to survive in that market, and how the survival rate depends on protocol parameters.
+
+\item 
+  Develop risk model for supply-side stability under pricing changes.
+
+  Such a risk model has two components:
+  \begin{itemize}
+    \item Acceptance thresholds for supply side outcomes, i.e.~node availability.
+    \item Behavioural model of how operators will respond to protocol and market environment.
+  \end{itemize}
+\end{itemize}
+
+\paragraph{How do we get to our objectives?}
+
+Before objectives are clearly set, it doesn't make much sense to spend too much time here.
+%
+But we can do some early mapping of possible easy wins: calling admin functions on the price oracle contracts, UI/API layer changes that control how users learn about prices.
+%
+Since price stability is likely to be defined by measuring against fiat currency, it will also be worthwhile to explore reliable onchain sources of BZZ exchange rate information.
+
+\subsection*{Withdrawals}
+
+The question of whether the 28 day withdrawal notice period is too long was reopened and a 14 day wait was proposed as an alternative. 
+%
+A wait of 14–28 days is quite common in staking protocols; since the primary motivation of the change is to make staking attractive to a more diverse operator set, having the wait be within range of what people are used to seeing is important.
+
+But how is the exact value chosen? 
+%
+Ultimately, what matters is the effect on node operator behaviour and service quality:
+%
+\begin{itemize}
+  \item 
+    A shorter notice period makes it less of a commitment, hence less risky, to be a staked node operator. 
+    %
+    So we would expect a shorter notice period to attract more node operators and more stake.
+  \item 
+    A shorter notice period means that nodes can make decisions on a shorter timescale, and give less notice to the network.
+    %
+    The primary concern this raises is nodes withdrawing stake to engage in short term trading activities such as selling into a BZZ price pump, a phenomenon that has been observed in other staking protocols.
+    %
+    A secondary concern is that a shorter notice period gives the supply side less time to react to upcoming node exits, though for this to matter there would have to be someone monitoring node exit notifications in the first place.
+\end{itemize}
+
+Where is the sweet spot in the tradeoff between attracting stake deposits and ensuring an orderly operator set? 
+%
+We don't have any data that would allow us to convincingly predict this, even if there were a concrete numerical objective. 
+%
+But what we do know is that \emph{any} finite notice period would be a reduction from the status quo today, where stake is locked indefinitely.
+%
+So we have proposed an online tuning approach: first, reduce the wait to the upper end of the ``typical'' range, observe, and adjust until the desired equilibrium is reached.
+
+There is also a more down-to-earth argument for 28 days, which is about the cadence in which network participants make decisions.
+%
+Node operators likely receive information about their costs on a monthly basis at most.
+%
+Revenue figures must be aggregated to act on them, and a monthly rolling figure seems like as reasonable a starting point as any.
+%
+Based on the timescale on which businesses normally operate, we think it is reasonable to ask operators to forecast their activity one month in advance.
