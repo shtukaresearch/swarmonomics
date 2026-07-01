@@ -1,0 +1,136 @@
+\maketitle
+%\thispagestyle{fancy}
+\section*{Overview}
+
+\begin{enumerate}
+  \item \emph{Price stability.}
+    We formulated quantitative price stability and predictability objectives and began seeking alignment with Swarm Research.
+    %
+    The strategy and timeline for improvements on price stability is still under development.
+
+  \item \emph{Withdrawals and stake record updates.} 
+    The SWIP is on hold pending a security review.
+
+\end{enumerate}
+
+\section*{Project management}
+
+\subsection*{Completed}
+
+\begin{itemize}
+  \item Price stability: Research into history of cloud object storage pricing.
+\end{itemize}
+
+\subsection*{Ongoing}
+
+\begin{itemize}
+  \item Price stability: Build alignment around user-facing price stability objectives framework. 
+  \item Price stability: Exploration of price controller design space.
+  \item Price stability: Develop risk model for supply-side stability under pricing changes
+\end{itemize}
+
+\subsection*{Backlog}
+\begin{itemize}
+  \item Migration-free stake registry: triage and concrete proposal.
+  \item Negative incentives: explore and evaluate solutions.
+  \item Consensus attacks: analyse variants, evaluate threat level, list mitigations.
+  \item Node dispersion: build mathematical model for address allocation schemes and node dispersion.
+  \item Big nodes: Establish framework for converting findings into contributions back into mainline bee
+\end{itemize}
+
+
+\section*{Current work}
+
+\subsection*{Stake withdrawals}
+
+The stake withdrawals upgrade is currently on hold pending a security review.
+
+\subsection*{Price stability}
+%
+We continue to structure the work in three workstreams:
+\begin{enumerate}
+  \item \emph{What do we want to happen?} Identify user and supplier needs, turn them into metrics, objectives, and thresholds.
+  \item \emph{What has been happening?} Measure and analyse metrics from Swarm and the wider market.
+  \item \emph{How do we get to our objectives?} Solution generation and evaluation.
+\end{enumerate}
+%
+This month our focus was on setting up early candidates for objective setting and seeking preliminary alignment with Swarm Research.
+
+\paragraph{What do we want to happen?}
+%
+It's essential to align on clear goals for price stability before executing on any solution strategy.
+%
+We presented some initial suggestions for price stability and predictability objectives to the Research Team, based on two principles:
+%
+\begin{enumerate}
+  \item \emph{Short term billing certainty.} Swarm should be able to commit to a firm quote for storage over an upcoming accounting epoch, most likely the calendar month.
+  \item \emph{Trust in long term price stability.} The month on month change in Swarm prices should be ``small'' except in exceptional circumstances.
+\end{enumerate}
+%
+To make the second objective precise, we need to quantify ``small'' and ``exceptional circumstances''. A reasonable yardstick for ``small'' are FX swings between major fiat currencies — since Swarm is global in nature, the storage price will certainly be exposed to these at the very least.
+%
+There are many ways to specify ``exceptional circumstances,'' but as a starting point we propose measuring \emph{frequency} and \emph{attribution to known phenomena}.
+%
+Then we can specify and track objectives such as ``eliminate price swings due to client behaviour at network radius changes'' or ``reduce price swings that are not associated to a known risk indicator of Swarm supply to at most once per year.''
+
+To provide evidence that these objectives are feasible, we'll do simulations and sketch approaches to implement variants of the objectives at different layers — see below.
+
+\paragraph{What has been happening?}
+
+See Figure \ref{fig:monthly-cost-estimate} for an estimate of the monthly dollar cost of Swarm storage over the past 12 months.
+%
+The difference between this cost sequence and the typical tradcloud experience is stark: 
+\begin{itemize}
+  \item The most striking phenomenon is the 150\% price jump in November, which we know was substantially influenced by a client behaviour that caused the reveal count to drop to zero as the network resident size dropped a notch.
+
+  The price returned to its previous levels three months later but continued to drop. Arguably, the mechanism is still in price discovery — and we have reason to believe that node operators are currently running at a loss, suggesting that another large price increase may be needed in the near future.
+  \item Even before November, where monthly prices were comparatively stable, July/August saw a price increase of over 20\%. At any tradcloud provider, this would be a newsworthy event; for Swarm, it's just another Tuesday. 
+\end{itemize}
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=\linewidth]{monthly-cost-estimate}
+  \caption{Monthly cost estimate.}
+  \label{fig:monthly-cost-estimate}
+\end{figure}
+
+\paragraph{How do we get to our objectives?}
+
+Price stability solutions can live at multiple layers of Swarm's architecture: protocol, middleware, admin policy, client, application, or presentation, to name a few. 
+%
+There is currently interest in the Swarm research community in exploring non-protocol interventions:
+%
+\begin{itemize}
+  \item \textbf{Policy.} Centralised price setting by the Foundation;
+  \item \textbf{Middleware.} Third party intermediary offering fixed pricing and internalising Swarm price risk.
+\end{itemize}
+%
+Either of these solutions could likely be deployed quickly, since they would not require going through the kind of rigorous evaluation that a protocol change would demand.
+
+If we wish to explore in-protocol or policy solutions, we will need a risk model to measure and forecast the impact of changes on Swarm service reliability.
+%
+A risk model comprises two components:
+%
+\begin{itemize}
+  \item \emph{What outcomes would we consider acceptable?} Acceptance thresholds for supply side outcomes, i.e.~node availability.
+   
+  We base our thresholds on two core objectives for Swarm service reliability:
+  \begin{enumerate}
+    \item \emph{Availability.} Minimise the rate $A$ of failed upload/download requests.
+    \item \emph{Durability.} Minimise the rate $B$ of irrecoverably lost data objects.
+  \end{enumerate}
+  The threshold for $B$ will need to be much lower than the threshold for $A$.
+  %
+  Going by advertised reliability figures from tradcloud storage, a typical threshold for $A$ would be an API request failure (5xx error) rate of $10^{-3}$, while $B$ should sit at under $10^{-9}$ objects lost per year.
+
+  Today, Swarm's availability and durability performance is upheld by the Foundation's not-for-profit node fleet.
+  %
+  However, ultimately Swarm will need to be able to function without not-for-profit operators; a risk model must therefore try to assess reliability based on the distribution of staked nodes.
+
+  \item \emph{What might happen under the proposed changes?} To answer this question, we need a behavioural model of how operators will respond to protocol and market environment.
+
+  For example, implementing central price setting by the Foundation requires the Foundation to choose a price that's enough to cover the costs of an adequately redundant node population.
+  %
+  The behavioural response we need to model here is the number of nodes the market will supply at a given price.
+    
+\end{itemize}
