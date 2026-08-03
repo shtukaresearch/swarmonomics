@@ -1,0 +1,195 @@
+\maketitle
+%\thispagestyle{fancy}
+\section*{Overview}
+
+\begin{enumerate}
+  \item \emph{Price stability.}
+    Created options and budget estimates for price stability work.
+
+    Argued in favour of changing the price oracle directly.  Created a notebook that simulates the effects of some simple alternative protocol rules on the past 12 months of storage pricing: \url{https://dusky-harbor-6a1f04.swarm.shtuka.io/}
+
+  \item \emph{Protocol risk.} 
+    Began work on protocol risk framework
+
+\end{enumerate}
+
+\section*{Project management}
+
+\subsection*{Completed}
+
+\begin{itemize}
+  \item Pricing: First exploration of price controller design space. Present options.
+\end{itemize}
+
+\subsection*{Ongoing}
+
+\begin{itemize}
+  \item Pricing: Build alignment around user-facing price objectives framework. 
+  \item Protocol risk: Develop risk model for supply-side stability under protocol changes.
+  \item Hardening consensus: analyse weaknesses, evaluate threat level, list mitigations.
+\end{itemize}
+
+
+In our design space exploration, we identified solutions that address price stability but also address objectives about price \emph{level} that we had not thus far considered.
+%
+Consequently, we are reframing the ``price stability'' workstream to be more generally about storage pricing.
+
+\subsection*{Forthcoming}
+
+\begin{itemize}
+  \item Upgrade process: streamlined stake migration and redistribution upgrade flow.
+\end{itemize}
+
+\subsection*{Backlog}
+\begin{itemize}
+  \item Upgrade process: revisit migration-free options for stake registry.
+  \item Negative incentives: explore and evaluate solutions.
+  \item Node dispersion: build mathematical model for address allocation schemes and node dispersion.
+  \item Big nodes: Establish framework for converting findings into contributions back into mainline bee.
+\end{itemize}
+
+
+\section*{Current work}
+
+\subsection*{Storage pricing}
+
+\paragraph{What do we want to happen?}
+
+The effectiveness of Swarm's pricing can be measured in terms of three objectives: safety ("not too low"), competitiveness ("not too high"), and stability. 
+%
+These criteria trade off against one another, but it can also be the case that all three can be improved at once.
+
+There are ways to improve price stability for users without protocol change: for example, by funneling users through a third party that offers stable pricing in exchange for a margin.
+
+However, it is impossible to sustainably improve safety or competitiveness of pricing without protocol change. 
+%
+The presence of a middleman on the consumer side has no effect on whether operators are underpaid. 
+%
+And if prices are too high, a middleman must overcharge and pass those costs onto his customers.
+
+We wrote about these topics in greater detail here: \url{https://hackmd.io/@i79XZRmjR86P6AbhL0jwVQ/S1IkymzmGx}.
+
+
+\paragraph{How do we get to our objectives?}
+%
+After an initial exploration of the design space of price quoting mechanisms and discussions with the research team, we identified a few likely options for addressing price stability in the near and long terms.
+
+We are seeking alignment with the research team on which of these options to prioritise.
+
+\paragraph{Long term solutions}
+
+\begin{enumerate}
+  \item \textbf{Protocol.} Revisit the design of the price oracle controller to improve its stability and efficiency properties.
+
+  For some simulations of what this could look like, see here: \url{https://dusky-harbor-6a1f04.swarm.shtuka.io/}
+  \item \textbf{Middleware-only.} Leave the price controller as is. Instead, rely on bootstrapping a competitive market of third-party fixed rates providers to offer stable pricing.
+\end{enumerate}
+
+Note that a market for third-party fixed rates providers may develop independently, even if the price quoting mechanism is modified to improve stability.
+%
+However, if Swarm is to depend entirely on the existence of this market for usable pricing, some resources will probably need to be devoted to accelerating its emergence.
+
+\paragraph{Temporary stopgaps}
+
+\begin{enumerate}
+  \item \textbf{Policy.} Choose and set prices centrally, aiming to keep them close to constant in fiat terms.
+  \item \textbf{Middleware.} A preferred partner deploys a fixed rate provider contract. Swarm's official user acquisition funnel directs new users to this partner's entry point.
+\end{enumerate}
+
+These options are essentially mutually exclusive: a USD-stable price leaves no margin left for a third party provider to run a business.
+%
+For the same reason, it would be hard to graduate from a central price-setting stopgap to a middleware-only long term solution.
+
+\subsection*{Protocol risk}
+
+Questions such as the following come up naturally in the course of developing and operating the Swarm Network:
+%
+\begin{itemize}
+  \item Is the system running safely, or do we need to intervene?
+  \begin{itemize}
+    \item If we do need to intervene, what intervention is appropriate?
+    \item How can we give ourselves the tools we need to intervene when intervention is called for?
+  \end{itemize}
+  \item Is it safe to roll out this change now?
+  \item Do the new rules call for monitoring a different set of metrics?
+  \item Could the new rules call for different types of intervention in case of risk events?
+  \begin{itemize}
+    \item If so, should we add levers to enable new types of intervention?
+  \end{itemize}
+\end{itemize}
+%
+We believe that Swarm protocol development would be both faster and safer if it introduces a \emph{risk framework} to systematically address these questions.
+
+During the course of ordinary network operation, a risk framework tells us what to monitor, what types of observations may give cause for concern, and what to do about it. It also tells us what levers we should consider installing so we can better respond to risk events.
+
+When processing SWIPs, a risk framework is invoked as a final review gate before deployment. Its purpose is to give the decision maker greater confidence that's it's \emph{safe to say yes} to the change under consideration.
+
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=\linewidth]{forecast-model-architecture}
+  \caption{Forecast model architecture}
+  \label{fig:forecast-model-architecture}
+\end{figure}
+
+We identify four components that make up a risk framework.
+
+\paragraph{Performance targets}
+
+Performance targets answer the question \emph{what constitutes a failure?}
+
+For example, one way in which the Swarm storage service might fail — probably the most serious — is to lose data that it has been paid to store before the paid-up storage lifecycle ends. 
+%
+A corresponding performance target is to never lose data.
+
+Ideally, performance targets should be ex post observable. 
+%
+We want to be able to look at a record of system performance over the past, say, 12 months, and distinguish whether the performance target has been met. 
+%
+Unfortunately, some performance targets of interest may be hard to observe directly; for example, this applies to user data loss. 
+%
+So we may need to estimate the probability that such events have occurred ex post in terms of what we can measure.
+
+\paragraph{Risk thresholds}
+
+Irrecoverable data loss should ideally never happen. 
+%
+But the real world doesn't allow us to predict with certainty that something will never happen: we must think in terms of bounding the risk.
+
+\emph{To what level do we need to bound the risk before certain decisions can be made? If risk has increased during the course of normal network operation, at what point is an unscheduled intervention called for?} Our answers to these questions are our \textbf{risk thresholds}.
+
+Choosing good risk thresholds is a matter of balancing the needs of the service against the costs of meeting the threshold and the confidence we have in our ability to assess risk.
+
+\paragraph{Forecast models}
+
+Since risk thresholds are defined in terms of probabilities of future events, a set of risk thresholds does not immediately give us something we can observe and act on. We need a forecast model to estimate the probabilities of failure within a given horizon.
+
+A forecast model for failures answers the question \emph{how likely are failures to arise before we can respond, given what we currently know about system state?} 
+%
+In mathematical terms, it estimates
+%
+\[
+  f(X) := \mathbb{P}[\text{failure within time }T \mid X]
+\]
+%
+where $T$ is the response horizon and $X$ is a set of measurements we have made.
+
+Whenever we make a protocol design decision, we implicitly make a forecast of this type: whatever the rationale for the choice may be, part of its role is to convince us that this choice will not lead to an excessively high risk of failure.
+%
+Aligning on a given design choice asks the stakeholders to trust this forecast enough to allow the production network to depend on it.
+%
+Building this trust will be easier if we have a way to \emph{quantify} how accurate these forecasts are and iteratively improve them.
+
+To do this, we must make the forecast step explicit and bolster it with measurements, knowledge about the system, and extreme case market scenarios and behaviour of operators.
+%
+Building and evaluating forecasts is the core technical work of a risk framework.
+
+\paragraph{Response protocol}
+
+\emph{What do we do if the risk has grown enough to warrant intervention?}
+
+Intervention may involve "putting a hand on the scales" — injecting cash or supply into the market — or exploiting the core team's privileged position to adjust parameters, roll out new code, or exert social influence. 
+%
+Each approach has its own costs and risks that must be analysed, ideally before a situation demanding urgent intervention ever arises.
+
+Protocol changes may call for or enable new means of intervention, and so the protocol upgrade process is an opportunity to consider adding new levers for future interventions.
