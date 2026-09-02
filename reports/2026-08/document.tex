@@ -1,0 +1,130 @@
+\maketitle
+%\thispagestyle{fancy}
+\section*{Overview}
+
+\begin{enumerate}
+  \item \emph{Price stability.}
+    Created options and budget estimates for price stability work.
+
+    Argued in favour of changing the price oracle directly.  Created a notebook that simulates the effects of some simple alternative protocol rules on the past 12 months of storage pricing: \url{https://dusky-harbor-6a1f04.swarm.shtuka.io/}
+
+  \item \emph{Protocol risk.} 
+    Began design work on protocol risk framework.
+
+\end{enumerate}
+
+\section*{Project management}
+
+\subsection*{Completed}
+
+\begin{itemize}
+  \item Pricing: First exploration of price controller design space. Present options.
+\end{itemize}
+
+\subsection*{Ongoing}
+
+\begin{itemize}
+  \item Upgrade process: streamlined stake migration and redistribution upgrade flow.
+  \item Protocol risk: Develop risk model for supply-side stability under protocol changes.
+  \item Hardening consensus: analyse weaknesses, evaluate threat level, list mitigations.
+  \item Pricing: Build alignment around user-facing price objectives framework. 
+\end{itemize}
+
+
+In our design space exploration, we identified solutions that address price stability but also address objectives about price \emph{level} that we had not thus far considered.
+%
+Consequently, we are reframing the ``price stability'' workstream to be more generally about storage pricing.
+
+\subsection*{Forthcoming}
+
+\begin{itemize}
+  \item Pricing: Build alignment around user-facing price objectives framework. 
+\end{itemize}
+
+\subsection*{Backlog}
+\begin{itemize}
+  \item Upgrade process: revisit migration-free options for stake registry.
+  \item Negative incentives: explore and evaluate solutions.
+  \item Node dispersion: build mathematical model for address allocation schemes and node dispersion.
+  \item Big nodes: Establish framework for converting findings into contributions back into mainline bee.
+\end{itemize}
+
+
+\section*{Current work}
+
+\subsection*{Swarm Network upgrade process}
+
+We've been talking about rolling out changes to Swarm's chain protocol for some time. 
+%
+It's time we revisited the question: \emph{How do we actually execute these upgrades?}
+
+Swarm's state is maintained across a decentralised network of nodes, which makes upgrading no easy feat.
+%
+We proposed the following recipe:
+
+\begin{enumerate}
+  \item \emph{Redeploy contracts every time.} Every time we make a breaking change to the protocol, whether wire-only or onchain, redeploy the full contract suite.
+
+  \emph{Why?} Incentivising operators to switch to the new version means we have to stop paying them to run the old version and start paying them to run the new version.
+  %
+  A single \code{Redistribution} contract cannot tell which commits come from the new version, so in order to redirect revenue we need to deploy a new one.
+  %
+  Partial redeployments require an admin privilege with a large attack surface that we should aim to renounce; if we do this, redeploying \code{Redistribution} means redeploying all incentive contracts.
+
+  \item \emph{Declare a cutover block height.} Announce the target block height at which the network will cut over to the new protocol version.
+
+  \emph{Why?} We need to provide operators with a clear social contract: upgrade within the specified window, and you will receive no interruptions to your income.
+  %
+  This contract must be communicated clearly in advance, with plenty of time left to react.
+
+  \item \emph{Put the cutover in the client.} Integrate the cutover into clients: the latest bee version should know how to speak both current and upcoming protocol versions, and how to migrate stake from old to new.
+  
+  \emph{Why?} In order to offer a consistent contract to operators upgrading within a window, client behaviour needs to be the same regardless of when in that window the upgrade happened.
+  %
+  Old clients and upgraded clients must have the same behaviour within the window.
+  %
+  That means letting the client handle when to switch protocol versions rather than making it an operator decision.
+
+  \item \emph{Make the cutover atomic.} Broadcast a single transaction  that pauses the old contracts and unpauses the new contracts at the same instant. As soon as clients observe this transaction, they execute the cutover.
+
+  \emph{Why?} Payments to operators on the old version must stop at the same time we start paying operators on the new version.
+  %
+  If we stop it later, so that the incentives for two versions overlap, we get perverse incentives and piecemeal migration.
+  %
+  If we stop it earlier, we get downtime during which no operator gets paid.
+  %
+  Given that we're doing it at the same time, we can derisk the operation by making it atomic.
+\end{enumerate}
+
+
+\begin{figure}[ht]
+  \begin{center}
+  \includegraphics[width=\linewidth]{coordinated-fork-migration}
+  \caption{Coordinated migration across a protocol cutover. State is represented as a bitmap, which we can think of as a toy model of the storage index. Yellow circles are bees that haven't yet upgraded; green circles are bees that have.}
+  \label{fig:coordinated-fork-migration}
+  \end{center}
+\end{figure}
+
+
+\paragraph{Transition challenges}
+Redeploying all contracts entails two challenges that we haven't always had to deal with: migrating stake and migrating batches.
+%
+If we're going to do this on every upgrade, we need to make this operation seamless and low-risk.
+%
+For a step in this direction, we proposed integrating stake migration into the client: \url{https://github.com/ethersphere/bee/issues/5577}.
+
+While we work towards a solution for migrating batches, we can carry out surgical redeployments of \code{Redistribution} and any other contracts whose code has changed, authorising the new deployment to redistribute revenue from the existing \code{Postage} contract at the same time as pausing the old ones.
+%
+The same arguments for making the cutover atomic and putting it in the client apply.
+
+This proposal doesn't address the question of how to transition the wire protocol at all. That is another story for another day.
+
+\paragraph{Alternate proposals}
+%
+An alternative approach that has been proposed is to recentralise upgrades by putting all contracts behind an upgradable proxy: \url{https://github.com/ethersphere/storage-incentives/pull/310}. 
+
+We argue that putting stake behind a proxy increases the attack surface for admin keys (from ``burn all stake'' to ``steal all stake'').
+%
+It's also not clear that there is a pressing need to proxy stake, pricing, or redistribution; of these, only stake needs significant state and assets to be transferred, and stake migration UX can be improved relatively easily with changes at the client level.
+%
+We support the idea of putting batches behind a proxy until the means to coordinate a user-driven batch migration can be established.
