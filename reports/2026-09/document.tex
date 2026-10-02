@@ -1,0 +1,173 @@
+\maketitle
+%\thispagestyle{fancy}
+\section*{Overview}
+
+\begin{enumerate}
+  \item \emph{Storage pricing.} Settled on protocol development goals. Proposed an ambitious programme of protocol changes to improve pricing stability.
+  \item \emph{Migration.} Proposed concrete measures for handling the next protocol upgrade. Next steps: sync with client and protocol team to discuss next upgrade.
+\end{enumerate}
+
+\section*{Project management}
+
+\subsection*{Ongoing}
+
+\begin{itemize}
+  \item Protocol risk: Develop risk model for supply-side stability under protocol changes.
+  \item Hardening consensus: analyse weaknesses, evaluate threat level, list mitigations.
+  \item Pricing: Build alignment around risks and costs of storage pricing improvement proposals. 
+  \item Upgrade process: develop/evaluate proposals for streamlining migration.
+\end{itemize}
+
+\subsection*{Backlog}
+\begin{itemize}
+  \item Negative incentives: explore and evaluate solutions.
+  \item Big nodes: Establish framework for converting findings into contributions back into mainline bee.
+\end{itemize}
+
+
+\section*{Current work}
+
+\subsection*{Storage pricing}
+
+Here is a compilation of the proposals we have for protocol change or admin policy for improving storage pricing.
+%
+They are packaged in such a way as to be mostly independent; the team can decide to use any subset of them and will probably see UX improvements.
+
+Since the most pressing concerns with these ideas seem to be matters of vision alignment or optics rather than technical, I have tried to highlight those risk factors in the descriptions.
+
+\paragraph{Central price quoting with sunset clause.}
+
+Use the admin surface to write prices directly into the \code{PriceOracle} contract. Treat as a temporary measure with defined sunset clause.
+
+Candidate sunset clause: when modified price controller that addresses known issues and hits stability goals under stress test in simulation is ready for rollout, AND operator population is within risk bounds for at least 6 months, deploy new price controller. Maintain fallback option to central price quoting for 12 months as safeguard after rollout, but promise timeline to revoking this authorisation.
+
+\begin{itemize}
+  \item \emph{Why?} Technically straightforward, predictable, and self-evidently effective at stabilising prices compared to autonomous solutions.
+
+  \item \emph{Operational risk.} Quoting infrastructure could fail, resulting in stale prices. If prices are stale in BZZ terms, this means pricing that drifts with BZZ price. If the quote price is a stablecoin, this is much less of an issue as we expect the quote to only need updating rarely.
+
+  Quoting infrastructure could be compromised or malfunction, quoting prices that are much too high or too low, either draining the postage contract and expiring everyone's batches or strangling operators' revenue.
+
+  Chosen price could be too low to incentivise operators at the target QoS, or too high to attract users. The admin is responsible for conducting market research to find an appropriate price to quote.
+
+  Changes in price could become a negotiation between the opco and large node operators.
+
+  \item \emph{Optics risk.} Accurate perception of failure/compromise risk.
+
+  Perception that the price-finding is ``not decentralised'' or ``communist''.
+
+  \item \emph{Vision alignment.} Censorship-resistance: admin-controlled pricing gives the admin unique, discriminating censoring power. The censoring power is more discriminating---but less potentially destructive---than the power to pause the contracts. It gives the admin the power to discriminate on users based on propensity to pay.
+\end{itemize}
+
+\paragraph{Price cap in USD terms}
+
+Set a maximum price expressed in USD terms.
+
+\begin{itemize}
+  \item \emph{Why?} Protects fixed-rates providers against unbounded cost hikes without making the pricing dependent on a central authority all the time.
+
+  \item \emph{Operational risk.} Conversion of the USD cap to BZZ terms must make use of a USD/BZZ price signal. This signal has high volatility and drift, and can be manipulated relatively cheaply. Some filtering may be necessary to avoid exposing operators and users to short term dislocations, but overfiltering it could also expose operators and users to mispricings.
+
+  If the cap is chosen too low, the price could spend much of the time at the limit, rendering the system effectively centrally quoted.
+
+  \item \emph{Optics risk.} Similar to central price quoting, but less immediate because the price doesn't always (hopefully rarely) sit at the limit.
+
+  \item \emph{Vision alignment.} Censorship-resistance: compared to central price quoting, it's harder to argue that a maximum price gives the admin the ability to censor users with lower propensity to pay, because the system allows the price to fall if the market will support it.
+\end{itemize}
+
+\paragraph{Use USDS (or alternative favoured stablecoin) as quote and settlement currency}
+
+\begin{itemize}
+  \item \emph{Why?} Solves most price stability/predictability issues by removing the highest frequency, highest amplitude component of the price signal from the equation. For most stakeholders, ``constant price'' becomes a workable solution to the pricing problem over long time periods. Less margin is lost to middlemen such as liquidity providers (in apps like beeport) and fixed rates providers, whose margin scales with volatility.
+
+  \item \emph{Alternative.} Use ETH for quoting and settlement. While still volatile, it has far lower volatility, higher distribution, and lower trading costs than BZZ. Having to swap to ETH to pay for storage is lower friction than swapping to BZZ. It is easy to obtain hedging instruments for ETH exposure, e.g.\ perps or options.
+
+  \item \emph{Operational risk.} Swarm gains a new counterparty dependency on the stablecoin issuer. This risk can be managed, but not avoided entirely, by choosing the issuer carefully and retaining the right to switch to a different stablecoin (or to ETH) if this becomes more attractive.
+
+  \item \emph{Optics risk.} Do Swarm's userbase view it as a negative that something like USDS is used for payments? What do other protocols widely perceived as ideologically aligned with decentralisation accept as payment?
+
+  Investors whose mental model of BZZ value accrual is linked to its use as a means of payment will be concerned at its removal. Thus, investors must be reassured that other, much more effective, value accrual mechanisms will take its place. I suggest promising to generate protocol revenue and using it to buy back the token, as many of the top performing projects are doing.
+
+  \item \emph{Vision alignment.} Self-sovereignty: dependence on a stablecoin whose value depends on assets held by a custodian could be regarded as a blocker to true self-sovereignty. In order to use Swarm, users must hold the stablecoin or depend on liquidity providers that hold it.
+
+  If the issuer can freeze balances, it can censor individual Swarm users (though this becomes more difficult if users interact with contracts collectively through a liquidity pool).
+
+  As far as I know, nothing in the vision of Swarm requires BZZ, as opposed to some other sufficiently decentralised/self-sovereign store of value, to be used for payments. The BZZ token was used to raise money from investors who expect a return, so there is a need to find a suitable value accrual mechanism for the token; but this is a practical and optics question, not a vision question.
+\end{itemize}
+
+\paragraph{Deadband + dwell time.}
+
+Do not modulate price as long as the reveal count remains within a nontrivial interval, the \emph{deadband} (e.g.\ $[2.5,5]$ daily average). Even if the reveal count exits the interval, do not adjust price if it returns to the deadband within some time limit, the \emph{dwell time}. (This is how thermostats work.)
+
+\begin{itemize}
+  \item \emph{Why?} Block short-lived, likely uninformative signals from discloating pricing. In particular, prevent or damp dislocations due to client bugs that get resolved within a couple of weeks, like last year's 11/11 meltdown.
+  \item \emph{Operational risk.} Calibration issues.
+  \item \emph{Optics risk, vision alignment.} Requires admin intervention for calibration. Parameters likely need periodic revision.
+\end{itemize}
+
+\paragraph{Allow operators to quote their reservation price.}
+
+Allow operators to quote a price at which they are prepared to provide service. Use these quotes as input to the price quoting algorithm. The service will never pay them less than the quoted price, but may pay them more.
+
+\begin{itemize}
+  \item \emph{Why?} Allow operators to express price preferences without turning off nodes, impacting service quality. Ingest price information at higher bandwidth.
+\end{itemize}
+
+At time of writing, this is more of an R\&D project than a specific proposal. Some design considerations:
+
+\begin{itemize}
+  \item This is an interface change for operators. It asks them to decide on and take actions they didn't previously have to take. Rolling out such a change requires educating operators as well as technical implementation.
+  \item To be practical for operators, the quantity quoted should be the amount of revenue they need to earn per unit committed capacity rather than the unit price of storage. Since revenue is split between nodes providing redundant service, in order to guarantee a certain level of revenue per node, the system needs to control both price and redundancy. In order to control redundancy, the system may hold nodes out of redistribution once the population has reached a certain level. The system designer may need to make a decision about the maximum number of nodes.
+  \item To satisfy desired invariants, the method of aggregation probably needs to be a uniform auction with reservation price. The reservation price can be controlled by a fallback method such as a price oracle on the existing design or an admin-quoted rate. The designer must make a decision about the minimum number of nodes needed to avoid fallback on the reservation rate. Without a minumum, if too few nodes participate, their operators may gain market power to push prices up.
+\end{itemize}
+
+\subsection*{Swarm Network upgrade process}
+
+We put together a SWIP draft that addresses how to do the very next migration, which is expected to be a redeployment of \code{Redistribution} only. 
+%
+The main difference compared to the approach sketched in last month's report is the decision to coordinate around a \emph{timestamp} rather than an event.
+%
+Compared to watching for an event, a timestamp has the advantage that we know when to expect it, and is not subject to fallible \code{eth\_getLogs} calls that complicate client design (thanks to mfw78 for pointing this out).
+
+In summary:
+\begin{itemize}
+  \item We propose that the next \code{Redistribution} contract redeployment and activation be coordinated around a \emph{cutover timestamp}, announced significantly in advance and communicated with scriptable migration instructions that operators can put in a cronjob.
+
+  \item We also include proposals for handling the case where both \code{Redistribution} and \code{StakeRegistry} are redeployed. The proposal does not cover how to deal with upgrading \code{Postage} or the wire protocol.
+
+  \item The admin commits to deploy and configure the new contracts \emph{before} the transition timestamp, and to broadcast the (atomic) contract cutover transaction \emph{at} the transition timestamp.
+
+  \item The transition can be made easier and safer for operators by the following client improvements, listed in increasing order of complexity:
+    \begin{itemize}
+      \item Add a \emph{clean shutdown} function to bee that waits until any currently active play (missed deadline, non-winner, claimed, contract paused) reaches a terminal state before closing.
+      \item Add a \emph{pause-gated shutdown} function that waits until \texttt{Redistribution} goes into paused state to shut down.
+      \item For cases where \texttt{StakeRegistry} is being redeployed, include a flag that causes the shutdown to block until the old \code{StakeRegistry} is paused, waits a random amount of time, then calls \code{migrateStake} and waits for a transaction receipt before closing.
+      \item Add an ABI transition function to bee that cuts over to the new chain protocol (replacing \code{storageincentives.agent}) on the first round boundary after the transition timestamp.
+    \end{itemize}
+\end{itemize}
+
+Last month's report also generated some lively discussions with contributor mfw78. We record here some of the take-homes from his recommendations:
+%
+\begin{itemize}
+  \item 
+    How do we synchronise around a timestamp? 
+    %
+    The simplest, albeit inelegant, answer is that clients switch ABI and a cutover transaction is broadcast at the same time.
+    %
+    There is a delay — probably short — where clients may attempt to use the new contracts before they are connected to the revenue streams.
+    %
+    During this time, attempts to participate in redistribution will revert, wasting gas.
+    
+    Gas prices on Gnosis are so low that this is unlikely to cause operators much concern.
+    %
+    Instead, the risk of earnings downtime is the dominant factor — but with this approach, it is still much less risk than has been incurred on previous migrations.
+
+  \item
+    A more elegant solution, proposed by mfw78, is to hardcode an activation timestamp into the new Redistribution contract deployment and to grant it admin privileges on all four of the old contracts.
+    %
+    Calls to \texttt{commit} should check if the current block timestamp is past the activation timestamp.
+    %
+    The first call for which that check passes should grant itself the redistributor role on the other contracts, revoke the old ones, and pause the old Redistribution contract.
+    
+    Some allowances may be made for the case that the activation timestamp falls in the middle of a round, so as to avoid interrupting play.
+\end{itemize}
