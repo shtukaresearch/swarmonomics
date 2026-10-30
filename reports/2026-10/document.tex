@@ -1,0 +1,75 @@
+\maketitle
+%\thispagestyle{fancy}
+\section*{Overview}
+
+\begin{enumerate}
+  \item \emph{Protocol risk.} Built first iteration of node forecasting tools, itself a first step towards estimating risk of service failures such as data loss.
+
+  The first monthly forecast report is bundled with this release.
+
+  \item \emph{Storage pricing and token design.} Gathered proposals for internal market design and token value accrual into a \href{https://claude.ai/artifact/7zcn4MBQzTQmZAYa4J5amg}{market design map}.
+  \item \emph{Migration.} Synced with client team and received positive feedback on all client improvement suggestions. Formalised proposal as \href{https://github.com/awmacpherson/SWIPs/blob/SWIP-74/SWIPs/SWIP-74.md}{SWIP-74}.
+\end{enumerate}
+
+\section*{Project management}
+
+\subsection*{Completed}
+
+\begin{itemize}
+  \item Upgrade process: develop/evaluate proposals for streamlining migration.
+\end{itemize}
+
+\subsection*{Ongoing}
+
+\begin{itemize}
+  \item Protocol risk: Develop risk model for supply-side stability under protocol changes.
+  \item Hardening consensus: analyse weaknesses, evaluate threat level, list mitigations.
+  \item Pricing: Build alignment around risks and costs of storage pricing improvement proposals. 
+\end{itemize}
+
+\subsection*{Backlog}
+\begin{itemize}
+  \item Negative incentives: explore and evaluate solutions.
+  \item Big nodes: Establish framework for converting findings into contributions back into mainline bee.
+\end{itemize}
+
+\newpage
+\section*{Current work}
+
+\subsection*{Protocol risk}
+
+This month, we began our work on forecasting Swarm's node supply as part of our risk framework for the storage service.
+
+\paragraph{Forecasting and risk}
+%
+The primary goal of forecasting is to estimate the probability of service failures, especially durability.
+%
+This includes forecasting under the current protocol rules and under counterfactual protocol rules.
+%
+We are particularly interested in estimating the service quality in the case that not-for-profit nodes such as those operated by the Foundation fail or censor.
+
+Durability failures occur when all nodes responsible for storing a piece of data stop serving that data.
+%
+The system assesses which for-profit nodes currently host some data via periodic audits.
+%
+A long string of missed audits can be taken as an indication that the node is no longer operational.
+%
+If all nodes responsible for hosting a piece of data go dark in this way, it's fair to assume that data is lost.
+
+So we attempt to model the probability that all nodes claiming responsibility for a particular address range go dark.
+
+\paragraph{Why node supply?}     
+%
+Since it will take some time to research and develop these models, we start with a very simple proxy: forecast the total number of nodes passing audits in a given month, without regard to which address ranges they claim.
+%
+These numbers are reported monthly in the \href{https://www.ethswarm.org/blog/2026/swarm-state-of-the-network-september-2026/}{Swarm Foundation blog}.
+%
+Our new contribution is to forecast them one month ahead, i.e.~to the end of November.
+%
+See the bundled report for full details.
+
+The forecast numbers should be taken with a pinch of salt.
+%
+First, the models only represent a first iteration.
+%
+Second, the forecast was likely thrown off by an exceptional event that occurred this month: the depth increased from 9 to 10 and the Foundation deployed an emergency fleet of 2048 nodes to stabilise the price.
