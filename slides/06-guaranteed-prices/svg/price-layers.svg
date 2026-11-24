@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 470" width="560" height="470" font-family="'IBM Plex Serif', Georgia, serif">
+  <defs>
+    <marker id="up" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#746c63"/>
+    </marker>
+  </defs>
+
+  <!-- Layer 1: guaranteed price/TTL -->
+  <rect x="2" y="2" width="556" height="118" rx="8" fill="#fdf5f3" stroke="#c84c32" stroke-width="2"/>
+  <text x="22" y="38" font-size="22" fill="#2a2520">1. Guaranteed price + TTL</text>
+  <text x="22" y="66" font-size="16" fill="#4d4740">Price and term fixed when the</text>
+  <text x="22" y="88" font-size="16" fill="#4d4740">contract is opened</text>
+  <g transform="translate(380,26)">
+    <line x1="0" y1="70" x2="160" y2="70" stroke="#d3cec7" stroke-width="1"/>
+    <line x1="10" y1="34" x2="150" y2="34" stroke="#c84c32" stroke-width="3" stroke-linecap="round"/>
+    <line x1="10" y1="26" x2="10" y2="42" stroke="#c84c32" stroke-width="2"/>
+    <line x1="150" y1="26" x2="150" y2="42" stroke="#c84c32" stroke-width="2"/>
+    <text x="80" y="62" font-size="13" fill="#746c63" text-anchor="middle">TTL</text>
+  </g>
+
+  <!-- Arrow 2 -> 1 -->
+  <line x1="280" y1="172" x2="280" y2="128" stroke="#746c63" stroke-width="2" marker-end="url(#up)"/>
+  <text x="294" y="155" font-size="15" fill="#746c63" font-style="italic">quote + premium</text>
+
+  <!-- Layer 2: managed stabilised quote -->
+  <rect x="2" y="176" width="556" height="118" rx="8" fill="#f0f6f4" stroke="#3d7a6a" stroke-width="2"/>
+  <text x="22" y="212" font-size="22" fill="#2a2520">2. Stabilised quote price</text>
+  <text x="22" y="240" font-size="16" fill="#4d4740">Managed, fixed in fiat terms</text>
+  <text x="22" y="262" font-size="16" fill="#4d4740">for months on end</text>
+  <g transform="translate(380,200)">
+    <line x1="0" y1="70" x2="160" y2="70" stroke="#d3cec7" stroke-width="1"/>
+    <polyline points="0,44 58,44 58,34 120,34 120,38 160,38" fill="none" stroke="#3d7a6a" stroke-width="3" stroke-linejoin="round"/>
+  </g>
+
+  <!-- Arrow 3 -> 2 -->
+  <line x1="280" y1="346" x2="280" y2="302" stroke="#746c63" stroke-width="2" marker-end="url(#up)"/>
+  <text x="294" y="329" font-size="15" fill="#746c63" font-style="italic">tracks, filtering transients</text>
+
+  <!-- Layer 3: damped, capped oracle -->
+  <rect x="2" y="350" width="556" height="118" rx="8" fill="#eef0f6" stroke="#4b5b8b" stroke-width="2"/>
+  <text x="22" y="386" font-size="22" fill="#2a2520">3. Damped, capped oracle price</text>
+  <text x="22" y="414" font-size="16" fill="#4d4740">Autonomous, on-chain; bounded</text>
+  <text x="22" y="436" font-size="16" fill="#4d4740">above in real terms</text>
+  <g transform="translate(380,374)">
+    <line x1="0" y1="70" x2="160" y2="70" stroke="#d3cec7" stroke-width="1"/>
+    <line x1="0" y1="18" x2="160" y2="18" stroke="#4b5b8b" stroke-width="1.5" stroke-dasharray="4 3"/>
+    <text x="160" y="12" font-size="13" fill="#746c63" text-anchor="end">cap</text>
+    <polyline points="0,50 14,46 24,48 36,40 48,42 58,34 70,30 82,22 94,22 104,26 116,34 128,32 140,40 150,44 160,42" fill="none" stroke="#4b5b8b" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+  </g>
+</svg>
